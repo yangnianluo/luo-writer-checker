@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>骡式写作工具 · 自动发货</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,'Microsoft YaHei',-apple-system,sans-serif;background:linear-gradient(135deg,#f8f9fc 0%,#eef1f8 100%);color:#1d1d1f;padding:28px;min-height:100vh}
+.container{max-width:800px;margin:0 auto}
+h1{font-size:21px;font-weight:600;letter-spacing:-.3px;margin-bottom:4px}
+.sub{color:#8e8e98;font-size:13px;margin:4px 0 20px}
+.card{background:#fff;border-radius:12px;padding:24px;margin-bottom:14px;border:1px solid #edf0f5;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card h3{font-size:15px;font-weight:600;margin-bottom:12px}
+.prod{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid #f4f5f8}
+.prod:last-child{border:0}
+.prod .name{font-size:15px;font-weight:500}
+.prod .price{font-size:20px;color:#6d28d9;font-weight:600}
+.prod .desc{font-size:12px;color:#8e8e98;margin-top:2px;line-height:1.4}
+.btn{background:#1d1d1f;color:#fff;border:none;padding:10px 24px;border-radius:8px;font-size:14px;cursor:pointer;transition:all .2s;font-weight:500;letter-spacing:-.1px}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.btn-sm{padding:7px 18px;font-size:12px}
+.btn-orange{background:#c2410c}
+.btn-orange:hover{background:#9a3412;box-shadow:0 4px 12px rgba(194,65,12,.25)}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);align-items:center;justify-content:center;z-index:100}
+.modal.show{display:flex}
+.modal-body{background:#fff;border-radius:16px;padding:32px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.modal-body .big{font-size:48px;margin-bottom:12px}
+.modal-body h2{font-size:20px;color:#1d1d1f;font-weight:600;margin-bottom:8px}
+.modal-body .cd{font-size:28px;color:#6d28d9;font-weight:600;background:#f5f6f9;padding:14px;border-radius:10px;margin:16px 0;letter-spacing:2px;font-family:monospace}
+.modal-body .hint{font-size:13px;color:#8e8e98}
+.modal-body .btn-close{margin-top:16px}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.stat{background:#fff;border-radius:10px;padding:16px;text-align:center;border:1px solid #edf0f5;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.stat .num{font-size:26px;font-weight:600}
+.stat .lbl{font-size:11px;color:#8e8e98;margin-top:4px}
+.stat.sold .num{color:#1d1d1f}
+.stat.remain .num{color:#6d28d9}
+.stat.revenue .num{color:#c2410c}
+.admin{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;border:1px solid #edf0f5;display:none;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.admin textarea{width:100%;height:120px;background:#f5f6f9;color:#1d1d1f;border:1px solid #e4e8ee;border-radius:8px;padding:10px;font-size:12px;font-family:monospace;resize:vertical;margin-bottom:8px}
+.admin .tabs{display:flex;gap:8px;margin-bottom:12px}
+.admin .tab{padding:6px 16px;border-radius:6px;cursor:pointer;font-size:13px;background:#f5f6f9;color:#8e8e98;border:1px solid transparent;transition:all .15s}
+.admin .tab.active{background:#f0ecfa;color:#6d28d9;border-color:#e8e2f8}
+.order{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f4f5f8;font-size:13px}
+.order:last-child{border:0}
+.order .info{flex:1}
+.order .code{color:#6d28d9;font-family:monospace}
+.order .sold{color:#1d1d1f;font-size:11px}
+.footer{margin-top:24px;text-align:center;color:#b8bcc6;font-size:12px}
+/* ===== 响应式：手机适配 ===== */
+@media(max-width:640px){
+  body{padding:14px}
+  .container{padding:0}
+  h1{font-size:18px}
+  .sub{font-size:12px}
+  .stats{gap:6px}
+  .stat{padding:12px}
+  .stat .num{font-size:20px}
+  .stat .lbl{font-size:10px}
+  .card{padding:16px}
+  .card h3{font-size:14px}
+  .prod{padding:12px 0;flex-direction:column;align-items:flex-start;gap:8px}
+  .prod .name{font-size:14px}
+  .prod .price{font-size:18px}
+  .prod .btn{width:100%;padding:11px;font-size:14px;min-height:44px;text-align:center}
+  .modal-body{padding:24px 20px;max-width:90%}
+  .modal-body .big{font-size:36px}
+  .modal-body h2{font-size:17px}
+  .modal-body .cd{font-size:20px;padding:12px;letter-spacing:1px}
+  .modal-body .btn{width:100%;padding:11px;min-height:44px}
+  .admin{padding:12px}
+  .admin textarea{height:80px}
+  .admin .tabs{gap:4px}
+  .admin .tab{padding:5px 10px;font-size:12px}
+  .order{padding:8px 0}
+  .order .info{flex:1;min-width:0}
+  .order .code{font-size:12px}
+  .footer{margin-top:16px;font-size:11px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🛒 骡式写作自检工具</h1>
+<p class="sub">付款后自动显示解锁码</p>
+
+<div class="stats" id="stats">
+  <div class="stat sold"><div class="num" id="soldCount">0</div><div class="lbl">已售</div></div>
+  <div class="stat remain"><div class="num" id="remainCount">0</div><div class="lbl">剩余码</div></div>
+  <div class="stat revenue"><div class="num" id="revenueCount">¥0</div><div class="lbl">收入</div></div>
+</div>
+
+<div class="card">
+  <h3>📦 选择会员方案</h3>
+  <div class="prod">
+    <div>
+      <div class="name">🔒 高级版</div>
+      <div class="desc">追尾规则 · 替读者总结 · 对话评分 · 五感均衡 · 弱动词 · 视角一致性 · 后续更新免费</div>
+    </div>
+    <div style="text-align:right">
+      <div class="price">¥25</div>
+      <button class="btn btn-sm" onclick="buy('pro')" style="margin-top:6px">购买</button>
+    </div>
+  </div>
+  <div class="prod">
+    <div>
+      <div class="name">🔥 终极版</div>
+      <div class="desc">每条违规附带改写指导 · 含打戏文戏专项 · 送一次改稿咨询 · 不限次数 · 后续更新免费</div>
+    </div>
+    <div style="text-align:right">
+      <div class="price">¥69</div>
+      <button class="btn btn-sm btn-orange" onclick="buy('vvip')" style="margin-top:6px">购买</button>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="border-color:#444">
+  <div style="font-size:13px;color:#888;line-height:1.8">
+    💡 点击购买后自动显示解锁码，绑定当前设备即可使用。<br>
+    一个解锁码可绑定3台设备，永久有效。换设备可在工具内自助解绑。<br>
+    本店商品为虚拟商品，售出不退。<br>
+    购买终极版送一次改稿咨询，不满意请联系作者沟通。
+  </div>
+</div>
+
+<div class="admin" id="adminPanel">
+  <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+    <span style="color:#e94560;font-size:14px;font-weight:bold">⚙ 管理员</span>
+    <button class="btn btn-sm btn-ghost" onclick="ta()" style="font-size:11px;background:transparent;border:1px solid #444;color:#888">关闭</button>
+  </div>
+  <div class="tabs">
+    <div class="tab active" id="tabPro" onclick="sw('pro')">🔑 高级码</div>
+    <div class="tab" id="tab终极版" onclick="sw('vvip')">🔥 终极版码</div>
+    <div class="tab" id="tabOrders" onclick="sw('orders')">📋 订单</div>
+  </div>
+  <div id="panelPro">
+    <div style="font-size:12px;color:#a78bfa;margin-bottom:6px">高级版码（每行一个）</div>
+    <textarea id="codesPro" placeholder="每行一个解锁码"></textarea>
+    <button class="btn btn-sm" onclick="save('pro')" style="background:#7c3aed">保存</button>
+    <button class="btn btn-sm btn-ghost" onclick="gen('pro')" style="margin-left:8px">生成50个</button>
+  </div>
+  <div id="panel终极版" style="display:none">
+    <div style="font-size:12px;color:#fb923c;margin-bottom:6px">终极版码（每行一个）</div>
+    <textarea id="codes终极版" placeholder="每行一个解锁码"></textarea>
+    <button class="btn btn-sm" onclick="save('vvip')" style="background:#ea580c">保存</button>
+    <button class="btn btn-sm btn-ghost" onclick="gen('vvip')" style="margin-left:8px">生成50个</button>
+  </div>
+  <div id="panelOrders" style="display:none">
+    <div id="orderList"><div style="color:#666;font-size:13px">暂无订单记录</div></div>
+  </div>
+</div>
+
+<div class="modal" id="successModal">
+  <div class="modal-body">
+    <div class="big">🎉</div>
+    <h2 id="modalTitle">购买成功！</h2>
+    <div style="font-size:13px;color:#888;margin-bottom:4px">你的解锁码：</div>
+    <div class="cd" id="modalCode">XXXX-XXXX</div>
+    <div style="font-size:13px;color:#888;margin-bottom:8px">👇 下载工具，输入解锁码使用</div>
+    <a class="btn" id="downloadBtn" style="display:inline-block;text-decoration:none;margin-bottom:12px" href="pro.html">📥 下载工具</a>
+    <div class="hint">打开 pro.html → 找到对应解锁条 → 输入上方解锁码 → 永久解锁</div>
+    <button class="btn btn-close btn-sm" onclick="cm()" style="margin-top:16px;background:#444">关闭</button>
+  </div>
+</div>
+
+<div style="background:#fff;border:1px solid #d1d5db;border-radius:10px;padding:12px 18px;margin-bottom:20px;display:flex;align-items:center;gap:10px;font-size:14px;box-shadow:0 1px 3px rgba(0,0,0,.04);text-align:left;justify-content:center">
+  <span style="font-size:20px">🔒</span>
+  <span><strong>所有文本在本地运行，不上传任何服务器。</strong>你的稿子只在你自己的电脑里，谁也看不到。</span>
+</div>
+<div class="footer">付款后自动显示解锁码 · 本店商品为虚拟商品，售出不退</div>
+<div style="text-align:center;color:#c7c7cc;font-size:11px;margin-top:8px">免责声明：本工具为写作辅助，检查结果仅供参考，不可替代专业编辑审校。</div>
+</div>
+
+<script>
+const STORE=atob('bHVvX3Nob3BfdjI=');
+function ld(){try{return JSON.parse(localStorage.getItem(STORE))||{codes:{pro:['laicai2025'],vvip:['laicai999']},used:{pro:[],vvip:[]},orders:[]}}catch(e){return{codes:{pro:['laicai2025'],vvip:['laicai999']},used:{pro:[],vvip:[]},orders:[]}}}
+function sv(d){localStorage.setItem(STORE,JSON.stringify(d))}
+
+let ac=0,atm=null;
+document.querySelector('h1').onclick=function(){ac++;if(ac>=5){ta();ac=0}clearTimeout(atm);atm=setTimeout(()=>{ac=0},2000)};
+
+function ta(){const p=document.getElementById('adminPanel');const v=p.style.display!=='block';p.style.display=v?'block':'none';if(v)rf()}
+function rf(){const d=ld();document.getElementById('codesPro').value=d.codes.pro.join('\n');document.getElementById('codes终极版').value=d.codes.vvip.join('\n');us(d);ro(d)}
+
+function us(d){
+  const up=d.used.pro.length,vv=d.used.vvip.length;
+  document.getElementById('soldCount').textContent=up+vv;
+  document.getElementById('remainCount').textContent=(d.codes.pro.length-up)+(d.codes.vvip.length-vv);
+  document.getElementById('revenueCount').textContent='¥'+(up*25+vv*69);
+}
+
+function sw(t){['tabPro','tab终极版','tabOrders'].forEach(id=>document.getElementById(id).classList.toggle('active',id==='tab'+(t==='pro'?'Pro':t==='vvip'?'终极版':'Orders')));['panelPro','panel终极版','panelOrders'].forEach(id=>document.getElementById(id).style.display=id==='panel'+(t==='pro'?'Pro':t==='vvip'?'终极版':'Orders')?'block':'none')}
+
+function save(t){const d=ld(),raw=document.getElementById(t==='pro'?'codesPro':'codes终极版').value.trim().split('\n').map(s=>s.trim()).filter(s=>s);if(!raw.length)return;d.codes[t]=raw;sv(d);us(d);alert('✅ 已保存 '+raw.length+' 个码')}
+
+function gen(t){const n=50,out=[],ch='abcdefghijkmnpqrstuvwxyz23456789';for(let i=0;i<n;i++){let s='';for(let j=0;j<7;j++)s+=ch[Math.floor(Math.random()*ch.length)];let sum=0;for(let j=0;j<7;j++)sum+=s.charCodeAt(j);s+=ch[sum%31];out.push(s.slice(0,4)+'-'+s.slice(4))}document.getElementById(t==='pro'?'codesPro':'codes终极版').value=out.join('\n')}
+
+function buy(t){
+  const d=ld(),codes=d.codes[t],used=d.used[t];let avail=null;
+  for(const c of codes){if(!used.includes(c)){avail=c;break}}
+  if(!avail)return alert('😅 暂时售罄了，请联系作者补充库存');
+  d.used[t].push(avail);d.orders.push({code:avail,tier:t,time:new Date().toISOString()});sv(d);us(d);
+  document.getElementById('modalTitle').textContent='🎉 '+(t==='pro'?'高级版':'终极版')+' 购买成功！';
+  document.getElementById('modalCode').textContent=avail;
+  document.getElementById('successModal').classList.add('show');
+}
+
+function cm(){document.getElementById('successModal').classList.remove('show')}
+
+function ro(d){
+  const el=document.getElementById('orderList');
+  if(!d.orders.length){el.innerHTML='<div style="color:#666;font-size:13px">暂无订单记录</div>';return}
+  el.innerHTML=[...d.orders].reverse().map(o=>`<div class="order"><div class="info"><div><span class="code">${o.code}</span><span style="color:#888;font-size:11px;margin-left:8px">${o.tier==='pro'?'高级':'终极版'}</span></div><div style="font-size:11px;color:#555">${new Date(o.time).toLocaleString('zh-CN')}</div></div><span class="sold">✅ ${o.tier==='pro'?'¥25':'¥69'}</span></div>`).join('');
+}
+
+rf();
+</script>
+</body>
+</html>

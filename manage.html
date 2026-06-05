@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>骡式写作 · 库存管理</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,'Microsoft YaHei',-apple-system,sans-serif;background:linear-gradient(135deg,#f8f9fc 0%,#eef1f8 100%);color:#1d1d1f;padding:28px;min-height:100vh}
+.container{max-width:800px;margin:0 auto}
+h1{font-size:21px;font-weight:600;letter-spacing:-.3px;cursor:pointer;user-select:none;margin-bottom:4px}
+.sub{color:#8e8e98;font-size:13px;margin:4px 0 20px}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.stat{background:#fff;border-radius:10px;padding:16px;text-align:center;border:1px solid #edf0f5;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.stat .num{font-size:26px;font-weight:600}
+.stat .lbl{font-size:11px;color:#8e8e98;margin-top:4px}
+.sold .num{color:#1d1d1f}
+.remain .num{color:#6d28d9}
+.revenue .num{color:#c2410c}
+.card{background:#fff;border-radius:10px;padding:16px;margin-bottom:12px;border:1px solid #edf0f5;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card h3{font-size:15px;font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;color:#1d1d1f}
+.badge{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:500}
+.badge-pro{background:#f0ecfa;color:#6d28d9}
+.badge-vvip{background:#fef1e8;color:#c2410c}
+.btn{background:#1d1d1f;color:#fff;border:none;padding:8px 18px;border-radius:8px;font-size:13px;cursor:pointer;transition:all .2s;font-weight:500}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.btn-sm{padding:6px 14px;font-size:11px}
+.btn-ghost{background:transparent;border:1px solid #e4e8ee;color:#8e8e98}
+.btn-ghost:hover{background:#fff;border-color:#d4d9e3;color:#1d1d1f}
+textarea{width:100%;height:100px;background:#f5f6f9;color:#1d1d1f;border:1px solid #e4e8ee;border-radius:8px;padding:10px;font-size:12px;font-family:monospace;resize:vertical}
+textarea:focus{outline:none;border-color:#1d1d1f;box-shadow:0 0 0 3px rgba(0,0,0,.06)}
+.code-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px;margin-top:10px}
+.code-item{background:#f5f6f9;border-radius:6px;padding:8px 10px;font-size:12px;font-family:monospace;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .15s;border:1px solid transparent}
+.code-item:hover{border-color:#d4d9e3}
+.code-item.used{opacity:.35;text-decoration:line-through}
+.opts{display:flex;gap:8px;margin:8px 0;flex-wrap:wrap}
+.footer{margin-top:24px;text-align:center;color:#b8bcc6;font-size:12px}
+.hint{font-size:12px;color:#8e8e98;margin-top:4px}
+/* ===== 响应式：手机适配 ===== */
+@media(max-width:640px){
+  body{padding:14px}
+  h1{font-size:18px}
+  .sub{font-size:12px}
+  .stats{gap:6px}
+  .stat{padding:12px}
+  .stat .num{font-size:20px}
+  .stat .lbl{font-size:10px}
+  .card{padding:12px}
+  .card h3{font-size:14px}
+  .code-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:4px}
+  .code-item{padding:6px 8px;font-size:11px}
+  .opts{gap:6px}
+  .opts .btn,.opts .btn-sm{padding:8px 14px;font-size:12px;min-height:40px}
+  textarea{height:80px;font-size:12px}
+  .footer{margin-top:16px;font-size:11px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1 title="点击刷新统计">📦 库存管理</h1>
+  <p class="sub">导入码 · 管理库存 · 点击码标记已售 · 统计</p>
+
+  <div class="stats">
+    <div class="stat sold"><div class="num" id="soldP">0</div><div class="lbl">高级已售</div></div>
+    <div class="stat sold"><div class="num" id="soldV">0</div><div class="lbl">终极版已售</div></div>
+    <div class="stat revenue"><div class="num" id="revenue">¥0</div><div class="lbl">总收入</div></div>
+  </div>
+
+  <div class="card">
+    <h3>🔑 高级版码 <span class="badge badge-pro">¥25</span></h3>
+    <div class="opts">
+      <button class="btn btn-sm" onclick="imp('pro')">📋 粘贴解锁码</button>
+      <button class="btn btn-sm btn-ghost" onclick="cp('pro')">📄 复制所有码</button>
+    </div>
+    <div class="hint">点击码标记为已售，再次点击恢复</div>
+    <div class="code-grid" id="poolPro"></div>
+    <div style="margin-top:8px;font-size:12px;color:#888">总库存: <span id="totalPro">0</span> · 剩余: <span id="availPro">0</span></div>
+  </div>
+
+  <div class="card">
+    <h3>🔥 终极版码 <span class="badge badge-vvip">¥69</span></h3>
+    <div class="opts">
+      <button class="btn btn-sm" onclick="imp('vvip')">📋 粘贴解锁码</button>
+      <button class="btn btn-sm btn-ghost" onclick="cp('vvip')">📄 复制所有码</button>
+    </div>
+    <div class="hint">点击码标记为已售，再次点击恢复</div>
+    <div class="code-grid" id="poolVVIP"></div>
+    <div style="margin-top:8px;font-size:12px;color:#888">总库存: <span id="totalVVIP">0</span> · 剩余: <span id="availVVIP">0</span></div>
+  </div>
+
+  <div class="footer">所有数据存储在本地浏览器，清空缓存会丢失，建议定期导出</div>
+<div style="text-align:center;color:#c7c7cc;font-size:11px;margin-top:8px">免责声明：本工具为写作辅助，检查结果仅供参考，不可替代专业编辑审校。</div>
+</div>
+
+<script>
+const STORE=atob('bHVvX3Nob3BfbWFuYWdl');
+function ld(){try{return JSON.parse(localStorage.getItem(STORE))||{pro:[],vvip:[]}}catch(e){return{pro:[],vvip:[]}}}
+function sv(d){localStorage.setItem(STORE,JSON.stringify(d));render()}
+function gp(t){const d=ld();return d[t]||[]}
+
+function imp(t){
+  const r=prompt('将码生成器的输出粘贴到这里，每行一个：');if(!r)return;
+  const nc=r.trim().split('\n').map(s=>s.trim()).filter(s=>s);if(!nc.length)return;
+  const d=ld(),pool=d[t],ex=new Set(pool.map(c=>c.code));
+  nc.forEach(c=>{if(!ex.has(c)){pool.push({code:c,used:false,time:null});ex.add(c)}});
+  d[t]=pool;sv(d);alert('✅ 导入了 '+nc.length+' 个码');
+}
+
+function cp(t){
+  const pool=gp(t);const txt=pool.map(c=>c.code).join('\n');
+  if(!txt)return alert('库存为空');
+  navigator.clipboard.writeText(txt).then(()=>alert('✅ 已复制 '+pool.length+' 个码')).catch(()=>prompt('手动复制：',txt));
+}
+
+function toggle(t,code){
+  const d=ld(),pool=d[t];const item=pool.find(c=>c.code===code);if(!item)return;
+  item.used=!item.used;item.time=item.used?new Date().toISOString():null;
+  d[t]=pool;sv(d);
+}
+
+function render(){
+  const d=ld();
+  document.getElementById('soldP').textContent=d.pro.filter(c=>c.used).length;
+  document.getElementById('soldV').textContent=d.vvip.filter(c=>c.used).length;
+  document.getElementById('revenue').textContent='¥'+(d.pro.filter(c=>c.used).length*25+d.vvip.filter(c=>c.used).length*69);
+  rp('pro',d.pro);rp('vvip',d.vvip);
+}
+
+function rp(t,pool){
+  const el=document.getElementById('pool'+(t==='pro'?'Pro':'VVIP'));
+  if(!pool.length){el.innerHTML='<div style="color:#666;font-size:13px">暂无库存，从码生成器导入</div>';return}
+  el.innerHTML=pool.map(c=>`<div class="code-item ${c.used?'used':''}" onclick="toggle('${t}','${c.code}')"><span>${c.code}</span><span style="font-size:10px;color:#888">${c.used?'✅':'○'}</span></div>`).join('');
+  document.getElementById('total'+(t==='pro'?'Pro':'VVIP')).textContent=pool.length;
+  document.getElementById('avail'+(t==='pro'?'Pro':'VVIP')).textContent=pool.filter(c=>!c.used).length;
+}
+
+render();
+</script>
+</body>
+</html>

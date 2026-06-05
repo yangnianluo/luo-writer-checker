@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>骡式写作自检工具</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,'Microsoft YaHei',-apple-system,sans-serif;padding:28px;min-height:100vh;transition:background .4s,color .3s}
+[data-theme=minimal]{--bg:linear-gradient(135deg,#f8f9fc 0%,#eef1f8 100%);--card-bg:#fff;--card-border:#edf0f5;--text:#1d1d1f;--text2:#8e8e98;--text3:#b8bcc6;--btn-bg:#1d1d1f;--accent:#6d28d9;--danger:#ff453a;--success:#30d158;--warn:#ff9f0a;--shadow:rgba(0,0,0,.04);--shadow-h:rgba(0,0,0,.15);--locked:#fafafe;--sec:#fff;--ta:#fff;--tab:#e4e8ee;--code:#f5f6f9;--pfree:#f1f2f6;--pfreec:#6e6e78;--pdeep:#f0ecfa;--pdeepc:#6d28d9;--pvip:#fef1e8;--pvipc:#c2410c;--rw:#f8f9fc;--fg:#fafbff}
+[data-theme=aurora]{--bg:radial-gradient(ellipse at 50% 0,#1a1a3e,#0f0f23);--card-bg:rgba(22,33,62,.85);--card-border:rgba(255,255,255,.08);--text:#e0e0e0;--text2:#888;--text3:#555;--btn-bg:#7c3aed;--accent:#a78bfa;--danger:#e94560;--success:#4ade80;--warn:#fbbf24;--shadow:rgba(0,0,0,.2);--shadow-h:rgba(124,58,237,.3);--locked:rgba(22,33,62,.5);--sec:rgba(22,33,62,.85);--ta:rgba(22,33,62,.75);--tab:rgba(255,255,255,.1);--code:rgba(0,0,0,.3);--pfree:rgba(30,58,95,.6);--pfreec:#93c5fd;--pdeep:rgba(59,31,110,.6);--pdeepc:#c4b5fd;--pvip:rgba(124,61,18,.6);--pvipc:#fdba74;--rw:rgba(30,41,59,.7);--fg:rgba(28,25,23,.85)}
+[data-theme=neon]{--bg:#0a0a0f;--card-bg:#12121a;--card-border:rgba(0,255,255,.15);--text:#e0f0f0;--text2:#7aa;--text3:#456;--btn-bg:#00ffcc;--accent:#00ffcc;--danger:#ff3366;--success:#00ff88;--warn:#ffbb00;--shadow:rgba(0,255,255,.05);--shadow-h:rgba(0,255,255,.2);--locked:#0d0d15;--sec:#12121a;--ta:#0d0d15;--tab:rgba(0,255,255,.12);--code:#0d0d15;--pfree:rgba(0,255,200,.08);--pfreec:#0ec;--pdeep:rgba(100,0,255,.12);--pdeepc:#a7f;--pvip:rgba(255,50,100,.1);--pvipc:#f46;--rw:#0d0d15;--fg:#0d0d15}
+[data-theme=warm]{--bg:linear-gradient(135deg,#fef9f0 0%,#fdf2e2 100%);--card-bg:#fffcf5;--card-border:#f0e6d6;--text:#3d3229;--text2:#8f7d6a;--text3:#c4b5a5;--btn-bg:#c6512e;--accent:#c6512e;--danger:#c0392b;--success:#27ae60;--warn:#f39c12;--shadow:rgba(0,0,0,.04);--shadow-h:rgba(198,81,46,.15);--locked:#fdf6ed;--sec:#fffcf5;--ta:#fffcf5;--tab:#f0e6d6;--code:#fdf6ed;--pfree:#f5ede4;--pfreec:#7d6b58;--pdeep:#f0e6dc;--pdeepc:#c6512e;--pvip:#fce8d8;--pvipc:#b04422;--rw:#fdf6ed;--fg:#fffcf5}
+[data-theme=forest]{--bg:linear-gradient(135deg,#0f1a12 0%,#1a2e1f 100%);--card-bg:rgba(26,46,31,.9);--card-border:rgba(100,180,120,.12);--text:#d0e8d4;--text2:#7aad83;--text3:#3d6b47;--btn-bg:#4a9e5a;--accent:#6fbf7f;--danger:#e05050;--success:#5ac06a;--warn:#e0b040;--shadow:rgba(0,0,0,.2);--shadow-h:rgba(74,158,90,.25);--locked:rgba(26,46,31,.7);--sec:rgba(26,46,31,.9);--ta:rgba(15,26,18,.8);--tab:rgba(100,180,120,.1);--code:rgba(15,26,18,.8);--pfree:rgba(74,158,90,.15);--pfreec:#7fcc8f;--pdeep:rgba(100,140,200,.12);--pdeepc:#8fc4f0;--pvip:rgba(200,150,60,.12);--pvipc:#e8c050;--rw:rgba(15,26,18,.7);--fg:rgba(26,46,31,.9)}
+body{background:var(--bg);color:var(--text)}
+h1{font-size:21px;color:var(--text);font-weight:600;letter-spacing:-.3px}
+.sub{color:var(--text2);font-size:13px;margin:6px 0 20px}
+.container{max-width:960px;margin:0 auto}
+.rule-pool{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}
+.rule-item{background:var(--card-bg);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--card-border);transition:all .2s;box-shadow:0 1px 3px var(--shadow)}
+.rule-item:hover{box-shadow:0 2px 8px var(--shadow);transform:translateY(-1px)}
+.rule-item .info{flex:1}
+.rule-item .name{font-size:13px;color:var(--text);font-weight:500}
+.rule-item .desc{font-size:11px;color:var(--text2);margin-top:2px}
+.switch{position:relative;width:36px;height:20px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.switch .slider{position:absolute;cursor:pointer;inset:0;background:var(--text3);border-radius:20px;transition:.25s}
+.switch .slider::before{content:'';position:absolute;height:16px;width:16px;left:2px;bottom:2px;background:var(--card-bg);border-radius:50%;transition:.25s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.switch input:checked+.slider{background:var(--btn-bg)}
+.switch input:checked+.slider::before{transform:translateX(16px)}
+.switch input:disabled+.slider{opacity:.3;cursor:not-allowed}
+textarea{width:100%;height:220px;background:var(--ta);color:var(--text);border:1px solid var(--tab);border-radius:10px;padding:14px 16px;font-size:14px;line-height:1.7;font-family:inherit;resize:vertical;transition:border-color .25s;box-shadow:inset 0 1px 3px var(--shadow)}
+textarea:focus{outline:none;border-color:var(--btn-bg);box-shadow:inset 0 1px 3px var(--shadow),0 0 0 3px rgba(100,100,100,.1)}
+textarea::placeholder{color:var(--text3)}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.btn{background:var(--btn-bg);color:var(--card-bg);border:none;padding:9px 28px;border-radius:8px;font-size:14px;cursor:pointer;transition:all .2s;font-weight:500;letter-spacing:-.1px}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px var(--shadow-h)}
+.btn:active{transform:translateY(0);box-shadow:0 1px 3px var(--shadow)}
+.btn-sm{padding:7px 16px;font-size:12px}
+.btn-ghost{background:transparent;border:1px solid var(--card-border);color:var(--text2)}
+.btn-ghost:hover{background:var(--card-bg);border-color:var(--card-border);color:var(--text)}
+.results{margin-top:24px}
+.section{background:var(--sec);border-radius:10px;padding:16px 18px;margin-bottom:10px;border:1px solid var(--card-border);box-shadow:0 1px 3px var(--shadow)}
+.section h3{font-size:13px;margin-bottom:10px;color:var(--text);display:flex;align-items:center;gap:6px;font-weight:600;letter-spacing:-.1px}
+.pass{color:var(--success)}
+.fail{color:var(--danger)}
+.warn{color:var(--warn)}
+.counter{font-size:12px;color:var(--text2);line-height:1.5}
+.item{padding:5px 0;border-bottom:1px solid rgba(100,100,100,.06);font-size:12px;display:flex;gap:6px;align-items:baseline}
+.item:last-child{border:0}
+.line-num{color:var(--text3);font-size:11px;min-width:28px;font-variant-numeric:tabular-nums}
+.ctx{color:var(--text2);word-break:break-all}
+.unlock-bar{background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px;box-shadow:0 1px 3px var(--shadow);transition:all .2s}
+.unlock-bar:hover{border-color:var(--card-border);box-shadow:0 2px 8px var(--shadow)}
+.unlock-bar .left .title{font-size:14px;font-weight:600;cursor:pointer;color:var(--text);letter-spacing:-.1px}
+.unlock-bar .left .hint{font-size:11px;color:var(--text2);margin-top:2px}
+.unlock-bar .right{display:flex;gap:8px;align-items:center}
+.unlock-bar input{background:var(--code);border:1px solid var(--card-border);border-radius:8px;padding:7px 11px;color:var(--text);font-size:12px;width:130px;transition:all .2s}
+.unlock-bar input:focus{outline:none;border-color:var(--btn-bg);box-shadow:0 0 0 3px rgba(100,100,100,.08)}
+.unlock-bar .ubtn{color:var(--card-bg);border:none;padding:7px 16px;border-radius:8px;font-size:12px;cursor:pointer;transition:all .2s;font-weight:500}
+.unlock-bar .ubtn:hover{transform:translateY(-1px);filter:brightness(1.1)}
+.unlock-bar .ubtn:active{transform:translateY(0)}
+.footer{margin-top:24px;text-align:center;color:var(--text3);font-size:12px}
+.priority{display:inline-block;font-size:10px;padding:2px 8px;border-radius:4px;margin-right:5px;font-weight:500}
+.pri-free{background:var(--pfree);color:var(--pfreec)}
+.pri-deep{background:var(--pdeep);color:var(--pdeepc)}
+.pri-vip{background:var(--pvip);color:var(--pvipc)}
+.admin-panel{background:var(--card-bg);border-radius:10px;padding:16px;margin-bottom:14px;display:none;border:1px solid var(--card-border);box-shadow:0 1px 3px var(--shadow)}
+.admin-panel textarea{height:80px;font-size:11px;font-family:monospace}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fight-card{background:var(--fg);border:1px solid var(--card-border);border-radius:10px;padding:16px;margin-bottom:10px;box-shadow:0 1px 2px var(--shadow)}
+.fight-card h4{color:var(--text);font-size:13px;margin-bottom:10px;font-weight:600}
+.fight-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.fight-cell{background:var(--card-bg);border:1px solid var(--card-border);border-radius:8px;padding:8px 10px;font-size:12px}
+.fight-cell .label{color:var(--text2);font-size:11px}
+.fight-cell .val{color:var(--text);margin-top:2px;font-weight:500}
+.fight-dir-bar{display:flex;gap:4px;align-items:end;height:28px;margin:10px 0}
+.fight-dir-bar .bar{flex:1;border-radius:3px 3px 0 0;min-height:4px;background:var(--text3);position:relative}
+.fight-dir-bar .bar-label{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--text2)}
+.tip-box{background:var(--rw);border-left:3px solid var(--danger);border-radius:6px;padding:10px 12px;margin-top:10px;font-size:12px;color:var(--text);line-height:1.5}
+.theme-picker{display:flex;gap:16px;flex-wrap:wrap;padding:12px 0 4px 0;align-items:center}
+.theme-picker span{font-size:11px;color:var(--text2);margin-right:4px}
+.theme-opt{width:36px;height:36px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s;position:relative;flex-shrink:0}
+.theme-opt:hover{transform:scale(1.2)}
+.theme-opt.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--card-bg),0 0 0 4px var(--accent)}
+.theme-opt .label{position:absolute;top:40px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--text2);white-space:nowrap;opacity:0;transition:opacity .2s;pointer-events:none}
+.theme-opt:hover .label{opacity:1}
+.t-minimal{background:linear-gradient(135deg,#f8f9fc,#eef1f8)}
+.t-aurora{background:radial-gradient(ellipse at 50% 0,#1a1a3e,#0f0f23)}
+.t-neon{background:#0a0a0f}
+.t-warm{background:linear-gradient(135deg,#fef9f0,#fdf2e2)}
+.t-forest{background:linear-gradient(135deg,#0f1a12,#1a2e1f)}
+/* ===== 评分面板 ===== */
+.score-section{background:var(--sec);border-radius:14px;padding:22px 24px;margin:16px 0;border:1px solid var(--card-border);box-shadow:0 2px 8px var(--shadow);display:none}
+.score-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.score-header h2{font-size:18px;font-weight:700;letter-spacing:-.3px;margin:0}
+.score-badge{display:flex;flex-direction:column;align-items:center;gap:2px}
+.score-big{font-size:48px;font-weight:800;line-height:1;letter-spacing:-2px}
+.score-grade{font-size:13px;padding:2px 14px;border-radius:20px;font-weight:600}
+.grade-S{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#78350f}
+.grade-A{background:#4ade80;color:#052e16}
+.grade-B{background:#60a5fa;color:#1e3a5f}
+.grade-C{background:#fbbf24;color:#713f12}
+.grade-D{background:#f87171;color:#450a0a}
+.score-dims{margin:16px 0;display:flex;flex-direction:column;gap:10px}
+.score-dim{display:flex;align-items:center;gap:10px}
+.score-dim .label{width:80px;font-size:12px;color:var(--text2);flex-shrink:0;text-align:right;font-weight:500}
+.score-dim .bar-wrap{flex:1;height:18px;background:var(--code);border-radius:9px;overflow:hidden;position:relative}
+.score-dim .bar-fill{height:100%;border-radius:9px;transition:width .6s ease;position:relative}
+.score-dim .bar-fill::after{content:attr(data-pct);position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:600;color:#fff}
+.score-dim .val{width:30px;font-size:13px;font-weight:600;text-align:center;flex-shrink:0;color:var(--text)}
+.score-toggle{display:flex;gap:6px}
+.score-toggle button{font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid var(--card-border);background:var(--card-bg);color:var(--text2);cursor:pointer;transition:all .15s}
+.score-toggle button.active{background:var(--pvip);color:var(--pvipc);border-color:var(--pvipc);font-weight:600}
+.score-breakdown{margin-top:14px;background:var(--rw);border:1px solid var(--card-border);border-radius:10px;padding:14px 16px;display:none}
+.score-breakdown.show{display:block}
+.score-breakdown h4{font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text)}
+.score-bd-item{padding:5px 0;font-size:12px;color:var(--text2);border-bottom:1px solid rgba(100,100,100,.06);display:flex;justify-content:space-between}
+.score-bd-item:last-child{border:0}
+.score-bd-item .bd-label{color:var(--text2)}
+.score-bd-item .bd-val{font-weight:500}
+.score-bd-item .bd-pass{color:var(--success)}
+.score-bd-item .bd-warn{color:var(--warn)}
+.score-bd-item .bd-fail{color:var(--danger)}
+.score-actions{display:flex;gap:8px;margin-top:12px}
+/* ===== 响应式：手机适配 ===== */
+@media(max-width:640px){
+  body{padding:14px}
+  h1{font-size:18px}
+  .sub{font-size:12px;margin:4px 0 14px}
+  .container{padding:0}
+  .unlock-bar{padding:10px 12px}
+  .unlock-bar .left .title{font-size:13px}
+  .unlock-bar .left .hint{font-size:10px}
+  .unlock-bar .right{gap:6px;width:100%;margin-top:6px}
+  .unlock-bar input{width:100%;flex:1;min-width:0;padding:8px 10px;font-size:13px;min-height:38px}
+  .unlock-bar .ubtn{padding:8px 14px;font-size:12px;min-height:38px}
+  .admin-grid{grid-template-columns:1fr}
+  .rule-pool{grid-template-columns:1fr}
+  .rule-item{padding:10px 12px}
+  .rule-item .name{font-size:12px}
+  .rule-item .desc{font-size:10px}
+  textarea{height:160px;padding:12px 14px;font-size:15px}
+  textarea::placeholder{font-size:13px}
+  .toolbar{gap:6px}
+  .toolbar .btn{flex:1;text-align:center;padding:11px 12px;font-size:14px;min-height:44px}
+  .toolbar .btn-sm{padding:11px 12px;font-size:13px;min-height:44px}
+  .section{padding:12px 14px}
+  .section h3{font-size:12px}
+  .item{font-size:11px}
+  .counter{font-size:11px}
+  .pri-free,.pri-deep,.pri-vip{font-size:9px;padding:1px 6px}
+  .theme-picker{gap:10px;justify-content:center}
+  .theme-opt{width:30px;height:30px}
+  .score-section{padding:16px 14px;margin:12px 0}
+  .score-header{flex-direction:column;align-items:flex-start;gap:6px}
+  .score-header h2{font-size:16px}
+  .score-toggle{width:100%}
+  .score-toggle button{flex:1;text-align:center;padding:8px 10px;font-size:11px;min-height:38px}
+  .score-big{font-size:38px}
+  .score-grade{font-size:12px}
+  .score-dim{gap:6px}
+  .score-dim .label{width:55px;font-size:11px}
+  .score-dim .bar-wrap{height:16px}
+  .score-dim .bar-fill::after{font-size:9px;right:4px}
+  .score-dim .val{width:24px;font-size:12px}
+  .score-breakdown{padding:10px 12px}
+  .score-bd-item{font-size:11px;flex-direction:column;gap:2px;padding:4px 0}
+  .fight-card{padding:12px}
+  .fight-card h4{font-size:12px}
+  .fight-grid{grid-template-columns:1fr 1fr}
+  .fight-cell{padding:6px 8px;font-size:11px}
+  .fight-dir-bar{height:22px}
+  .footer{font-size:11px;margin-top:16px}
+}
+@media(max-width:380px){
+  body{padding:10px}
+  h1{font-size:16px}
+  .score-dim .label{width:45px;font-size:10px}
+  .score-big{font-size:32px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>✏️ 骡式写作自检工具</h1>
+<p class="sub">选规则，贴正文，一键检查</p>
+
+<div style="background:var(--card-bg);border:1px solid var(--card-border);border-radius:8px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:8px;font-size:12px">
+  <span style="font-size:16px">🔒</span>
+  <span style="color:var(--text2)">所有文本在本地运行，不上传任何服务器。</span>
+</div>
+
+<div class="unlock-bar" id="barPro">
+  <div class="left">
+    <div class="title" id="tPro">🔒 高级版 ¥25</div>
+    <div class="hint">追尾规则 · 替读者总结 · 对话评分 · 五感均衡 · 弱动词 · 视角一致性 · 后续规则持续更新</div>
+  </div>
+  <div class="right" id="aPro">
+    <input type="text" id="iPro" placeholder="高级解锁码" onkeydown="if(event.key==='Enter')ul('pro')">
+    <button class="ubtn" onclick="ul('pro')" style="background:var(--btn-bg)">解锁</button>
+  </div>
+</div>
+
+<div class="unlock-bar" style="border-color:var(--pvipc);background:var(--card-bg)" id="bar终极版">
+  <div class="left">
+    <div class="title" style="color:var(--pvipc)" id="t终极版">🔥 终极版 ¥69</div>
+    <div class="hint">每条违规附带改写指导 · 教你把30分拉到60分 · 含打戏文戏专项</div>
+  </div>
+  <div class="right" id="a终极版">
+    <input type="text" id="i终极版" placeholder="终极版解锁码" onkeydown="if(event.key==='Enter')ul('vvip')">
+    <button class="ubtn" onclick="ul('vvip')" style="background:#ea580c">解锁</button>
+  </div>
+</div>
+
+<div class="unlock-bar" id="themeBar" style="display:none;border-color:var(--accent)">
+  <div class="left">
+    <div class="title" style="font-size:13px">🎨 主题</div>
+    <div class="hint">付费用户专属，选你喜欢的背景</div>
+  </div>
+  <div class="right">
+    <div class="theme-picker" id="themePicker">
+      <span>选择背景：</span>
+      <div class="theme-opt t-minimal" data-theme="minimal" onclick="setTheme('minimal')"><div class="label">极简</div></div>
+      <div class="theme-opt t-aurora" data-theme="aurora" onclick="setTheme('aurora')"><div class="label">极光</div></div>
+      <div class="theme-opt t-neon" data-theme="neon" onclick="setTheme('neon')"><div class="label">赛博</div></div>
+      <div class="theme-opt t-warm" data-theme="warm" onclick="setTheme('warm')"><div class="label">暖阳</div></div>
+      <div class="theme-opt t-forest" data-theme="forest" onclick="setTheme('forest')"><div class="label">墨绿</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="admin-panel" id="adminPanel">
+  <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+    <span style="color:var(--danger);font-size:13px">⚙ 管理员</span>
+    <button class="btn btn-sm btn-ghost" onclick="ta()" style="font-size:12px">收起</button>
+  </div>
+  <div class="admin-grid">
+    <div><div style="font-size:12px;color:#a78bfa;margin-bottom:4px">🔑 高级版码（¥25）</div><textarea id="cPro" placeholder="每行一个码"></textarea></div>
+    <div><div style="font-size:12px;color:var(--pvipc);margin-bottom:4px">🔥 终极版码（¥69）</div><textarea id="c终极版" placeholder="每行一个码"></textarea></div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:8px">
+    <button class="btn btn-sm" onclick="uc()" style="background:var(--btn-bg);font-size:12px">更新</button>
+    <button class="btn btn-sm btn-ghost" onclick="es()" style="font-size:12px">统计</button>
+  </div>
+  <div id="adminMsg" style="font-size:12px;color:#888;margin-top:6px"></div>
+</div>
+
+<textarea id="input" placeholder="在此粘贴你的小说正文……"></textarea>
+<div class="toolbar">
+  <button class="btn" onclick="run()">检查</button>
+  <button class="btn btn-sm btn-ghost" onclick="demo()">加载示例</button>
+  <button class="btn btn-sm" id="scoreBtn" onclick="showScorePanel()" style="background:var(--pvipc);display:none">📊 评分</button>
+</div>
+<div class="results" id="results" style="display:none"></div>
+
+<div class="score-section" id="scoreSection">
+  <div class="score-header">
+    <h2>📊 写作评分</h2>
+    <div class="score-toggle" id="scoreToggle">
+      <button class="active" data-mode="new" onclick="switchScore('new')">新读者标准</button>
+      <button data-mode="old" onclick="switchScore('old')">老读者标准</button>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:30px;flex-wrap:wrap">
+    <div class="score-badge">
+      <div class="score-big" id="scoreBig">0</div>
+      <div class="score-grade" id="scoreGradeLabel">—</div>
+      <div class="score-total-label" id="scoreTotalLabel">总分</div>
+    </div>
+    <div style="flex:1;min-width:250px">
+      <div class="score-dims" id="scoreDims"></div>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:6px">
+    <button class="btn btn-sm btn-ghost" onclick="toggleBreakdown()">📋 查看评分依据</button>
+  </div>
+  <div class="score-breakdown" id="scoreBreakdown">
+    <h4>📋 评分依据</h4>
+    <div id="scoreBdContent"></div>
+  </div>
+</div>
+
+<div class="footer">免责声明：本工具为写作辅助，检查结果仅供参考，不可替代专业编辑审校。</div>
+</div>
+
+<script>
+// ===== 管理员 =====
+let ao=false;
+function ta(){const p=document.getElementById('adminPanel');ao=!ao;p.style.display=ao?'block':'none';if(ao){document.getElementById('cPro').value=pc.join('\n');document.getElementById('c终极版').value=vc.join('\n')}}
+document.getElementById('tPro').ondblclick=ta;
+document.getElementById('t终极版').ondblclick=ta;
+
+// ===== 设备指纹 =====
+function fp(){let s=[navigator.userAgent||'',navigator.language||'',screen.width||'',screen.height||'',navigator.platform||'',new Date().getTimezoneOffset()||0].join('|'),h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0}return 'fp_'+Math.abs(h).toString(16)}
+const DID=fp(),BK='luo_bind_v3';
+function rb(){try{return JSON.parse(localStorage.getItem(BK))||{}}catch(e){return{}}}
+function sb(b){localStorage.setItem(BK,JSON.stringify(b))}
+
+// ===== 解锁 =====
+let pc=['laicai2025'],vc=['laicai999'];
+let pu=false,vu=false;
+let bc={}; // 当前设备绑定的码
+
+function ul(t){
+  const ip=t==='pro',id=ip?'iPro':'i终极版',code=document.getElementById(id).value.trim();
+  if(!code)return alert('输入解锁码');
+  const list=ip?pc:vc;
+  if(!list.includes(code))return alert('解锁码无效');
+  // 校验和验证（新格式代码）
+  if(/^[a-z0-9]{4}-[a-z0-9]{4}$/.test(code)&&!verifyCs(code))return alert('解锁码校验失败，请联系卖家');
+  const b=rb(),r=b[code];
+  if(r){
+    if(r.d.includes(DID)){ip?(pu=true,bc.pro=code,ep()):(vu=true,bc.vvip=code,ev());return alert('✅ 已恢复')}
+    if(r.d.length>=3)return alert('已绑定3台设备');
+    r.d.push(DID);
+  }else{b[code]={d:[DID],t:ip?'p':'v',fs:new Date().toISOString()}}
+  sb(b);ip?(pu=true,bc.pro=code,ep()):(vu=true,bc.vvip=code,ev());alert('✅ 已激活');
+}
+function ep(){pu=true;document.getElementById("themeBar").style.display="flex";document.getElementById('tPro').innerHTML='✅ 高级版 · 已解锁';document.getElementById('aPro').innerHTML='<span style="color:#4ade80;font-size:13px">✅ 已解锁</span> <button class="ubtn" onclick="ub(\'pro\')" style="background:#666;font-size:11px;padding:4px 10px;margin-left:6px">解绑</button>';rules.forEach(r=>{if(r.l==='deep')r.enabled=true});rr()}
+function ev(){ep();document.getElementById('t终极版').innerHTML='🔥 终极版 · 已解锁';document.getElementById('a终极版').innerHTML='<span style="color:var(--pvipc);font-size:13px">✅ 已解锁</span> <button class="ubtn" onclick="ub(\'vvip\')" style="background:#666;font-size:11px;padding:4px 10px;margin-left:6px">解绑</button>';rules.forEach(r=>{if(r.l==='vip')r.enabled=true});rr();document.getElementById('scoreBtn').style.display='inline-block'}
+
+// ===== 解绑 =====
+function ub(t){
+  if(!confirm('解绑后本设备将失去该版本的解锁状态，可重新用原码激活。确定解绑？'))return;
+  const b=rb();let cleared=false;
+  for(const c in b){
+    if(b[c].t!==(t==='pro'?'p':'v'))continue;
+    const idx=b[c].d.indexOf(DID);
+    if(idx===-1)continue;
+    b[c].d.splice(idx,1);
+    if(b[c].d.length===0)delete b[c];
+    cleared=true;
+  }
+  if(!cleared)return alert('未找到绑定记录');
+  sb(b);
+  if(t==='pro'){pu=false;bc.pro=null;document.getElementById('tPro').innerHTML='🔒 高级版 ¥25';document.getElementById('aPro').innerHTML='<input type="text" id="iPro" placeholder="高级解锁码" onkeydown="if(event.key===\'Enter\')ul(\'pro\')"><button class="ubtn" onclick="ul(\'pro\')" style="background:var(--btn-bg)">解锁</button>';rules.forEach(r=>{if(r.l==='deep')r.enabled=false})}
+  else{vu=false;bc.vvip=null;document.getElementById('t终极版').innerHTML='🔥 终极版 ¥69';document.getElementById('a终极版').innerHTML='<input type="text" id="i终极版" placeholder="终极版解锁码" onkeydown="if(event.key===\'Enter\')ul(\'vvip\')"><button class="ubtn" onclick="ul(\'vvip\')" style="background:#ea580c">解锁</button>';rules.forEach(r=>{if(r.l==='vip')r.enabled=false})}
+  rr();alert('✅ 已解绑。需要时可重新输入原码激活。');
+}
+
+// ===== 校验和 =====
+const CS_CHARS='abcdefghijkmnpqrstuvwxyz23456789';
+function cs(s){
+  // 计算8位码前7位的校验和（格式: XXXX-XXXC，跳过中间的-）
+  const ch=s.replace('-',''); // 去掉横杠，得到8个字符
+  let sum=0;
+  for(let i=0;i<7;i++)sum+=ch.charCodeAt(i);
+  return CS_CHARS[sum%31];
+}
+function verifyCs(code){
+  const ch=code.replace('-','');
+  if(ch.length!==8)return true; // 旧格式跳过
+  return ch[7]===cs(code);
+}
+function uc(){const p=document.getElementById('cPro').value.trim().split('\n').map(s=>s.trim()).filter(s=>s);const v=document.getElementById('c终极版').value.trim().split('\n').map(s=>s.trim()).filter(s=>s);if(p.length)pc=p;if(v.length)vc=v;document.getElementById('adminMsg').textContent='✅ 高级'+pc.length+'个 · 终极版'+vc.length+'个'}
+function es(){const b=rb();const p=Object.keys(b).filter(c=>b[c].t==='p').length,v=Object.keys(b).filter(c=>b[c].t==='v').length;const ds=new Set();Object.keys(b).forEach(c=>b[c].d.forEach(d=>ds.add(d)));document.getElementById('adminMsg').textContent='📊 高级'+p+'个 + 终极版'+v+'个，共'+ds.size+'台设备'}
+
+// ===== 规则 =====
+const rules=[
+  {id:'dash',n:'破折号',d:'零容忍',l:'free',enabled:true},
+  {id:'excl',n:'感叹号堆叠',d:'!!？？！!等堆叠',l:'free',enabled:true},
+  {id:'quote',n:'引号不配对',d:'左右引号数量不一致',l:'free',enabled:true},
+  {id:'de',n:'"的"字密度',d:'单句超过3个"的"',l:'free',enabled:true},
+  {id:'dedede',n:'"的地得"混用',d:'的地得使用错误',l:'free',enabled:true},
+  {id:'wc',n:'汉字字数',d:'仅汉字算字数',l:'free',enabled:true},
+  {id:'repeatchar',n:'重复字检测',d:'50字内同字≥3次报警',l:'free',enabled:true},
+  {id:'custom',n:'自定义禁词',d:'输入你想禁的词',l:'free',enabled:true},
+  {id:'ranhou',n:'过渡词过多',d:'然后/接着/于是',l:'free',enabled:true},
+  {id:'haoxiang',n:'弱确定词',d:'似乎/好像/仿佛',l:'free',enabled:true},
+  {id:'manman',n:'慢速副词',d:'慢慢/缓缓/渐渐',l:'free',enabled:true},
+  {id:'aiwords',n:'AI过渡词',d:'值得注意的是/不可否认的是/显而易见/众所周知',l:'free',enabled:true},
+  {id:'tail',n:'追尾规则',d:'第三句是废话',l:'deep',enabled:pu},
+  {id:'summary',n:'替读者总结',d:'他意识到/这意味着',l:'deep',enabled:pu},
+  {id:'dialogue',n:'对话提示语',d:'人在前/中/后比例',l:'deep',enabled:pu},
+  {id:'senses',n:'五感均衡',d:'检测缺失感官通道',l:'deep',enabled:pu},
+  {id:'weakverb',n:'弱动词统计',d:'句首"是/在/有"',l:'deep',enabled:pu},
+  {id:'pov',n:'视角一致性',d:'限知不泄露内心',l:'deep',enabled:pu},
+  {id:'fight',n:'🥊 打戏专项',d:'动作密度·传导链·方向词',l:'vip',enabled:vu},
+  {id:'write',n:'📝 文戏专项',d:'段落节奏·开篇检测·留白',l:'vip',enabled:vu},
+];
+const lbs={free:'<span class="priority pri-free">免费</span>',deep:'<span class="priority pri-deep">高级</span>',vip:'<span class="priority pri-vip">终极版</span>'};
+const rw={
+  dash:[['他猛地听到身后传来一阵脚步声——不是一个人，是三个人的。','身后脚步声撞进耳朵。三个，不是一个人。'],['他猛地听到身后传来一阵脚步声——不是一个人，是三个人的。','脚步声在后巷炸开。他数出来了——三个。'],['他猛地听到身后传来一阵脚步声——不是一个人，是三个人的。','三个人的脚步声，踩在碎石上，错不了。']],
+  repeatchar:[['裂缝边缘的土层从灰色过渡到红褐色再变成深赭色再到接近黑色。这是一道很宽的裂缝。裂缝很大。裂缝在不断扩张。','裂缝边缘的土层从灰到红褐再到深赭。裂缝很宽，边缘还在无声地扩大。'],['裂缝边缘的土层从灰色过渡到红褐色再变成深赭色再到接近黑色。这是一道很宽的裂缝。裂缝很大。裂缝在不断扩张。','土层在裂缝边缘分层——灰、红褐、深赭。裂缝还在扩大。']],
+  excl:[['一个人影冲了出来！！','一个人影冲了出来。'],['有人吗！！你他妈的是谁！！','"有人吗？你是谁？"']],
+  quote:[['"他来了。"沈森说。"来了。"他点点头。','检查引号是否配对，左右引号数量不匹配。']],
+  de:[['他的手指在微微的颤抖着，他的眼睛里充满了恐惧。','指尖轻颤，恐惧从眼底漫出来。'],['他的手指在微微的颤抖着，他的眼睛里充满了恐惧。','手指抖了一下。眼底全是恐惧。']],
+  dedede:[['他深深的吸了口气，快速的地跑向废墟。','他深深吸了口气，快速地跑向废墟。'],['他深深的吸了口气，快速的地跑向废墟。','他深吸一口气，快步跑向废墟。']],
+  ranhou:[['他先检查了弹药，然后爬上废墟，接着他又听到了声音。','他先检查弹药，翻上废墟时，又听到了那个声音。'],['他先检查了弹药，然后爬上废墟，接着他又听到了声音。','弹药没问题。翻上废墟——那个声音又来了。']],
+  haoxiang:[['他似乎听到了什么，好像有人在叫他的名字。','他听到——有人在叫他的名字。'],['他似乎听到了什么，好像有人在叫他的名字。','风里夹着一声喊。他的名字。']],
+  manman:[['他慢慢地举起枪，缓缓地扣下扳机。','他举枪，扣扳机。'],['他慢慢地举起枪，缓缓地扣下扳机。','枪抬起来，手指已经搭在扳机上。']],
+  tail:[['这是一道很宽的裂缝。裂缝很大。裂缝在不断扩张。','裂缝很宽，边缘还在无声地扩大。'],['这是一道很宽的裂缝。裂缝很大。裂缝在不断扩张。','裂缝的宽度还在增加。边缘的碎石无声剥落。']],
+  summary:[['那个动作不是攻击，是试探。','他侧身滑了一步，拳头擦着耳朵过去。'],['那个动作不是攻击，是试探。','拳头擦过耳朵。他侧滑一步，拳风刮得脸皮发麻——不是冲着要命来的。']],
+  weakverb:[['他的手指在颤抖。','指尖在抖。'],['他的手指在颤抖。','手指不受控制地敲击枪管。']],
+  pov:[['沈森意识到自己已经没有退路了。','沈森把牙一咬，脚掌在碎石上碾了半圈。'],['沈森意识到自己已经没有退路了。','退路？沈森碾了碾脚底的碎石。没有退路了。']],
+  dialogue:[['沈森说："你来了。"\n"来了。"他说。','"你来了。"沈森的声音压得很低。\n他点点头："来了。"'],['沈森说："你来了。"\n"来了。"他说。','"你来了。"\n黑暗里那个声音回了一句："来了。"']],
+  senses:[['周围一片黑暗，什么都看不见，也听不到任何声音。','黑暗里只有呼吸声。柴油味从墙角渗过来，混着铁腥。'],['周围一片黑暗，什么都看不见，也听不到任何声音。','眼睛没用。铁锈味和柴油味已经告诉他在哪了。']],
+  fight:[['他一拳打了过去。','他沉肩转胯，右拳从腰际弹出去，直奔对方肋下。那人拧身避开，拳风刮着衣服过去。'],['他一拳打了过去。','右拳砸出去，他重心跟着前压。对方侧身，拳头擦着肋骨过去，打空了，但距离够了。']],
+};
+
+function getRw(id){return rw[id]}const tips={
+  dash:'成熟的网文写手不会在正文里用破折号。换逗号或者句号，节奏反而更紧。',
+  excl:'两个感叹号不会让情绪加倍。真正愤怒的人声音是压低的。沉默比喊叫更有重量。',
+  tail:'同一物象第一句定锚，第二句余韵，写到第三句就是废话了。相信读者自己能看懂。',
+  summary:'"他意识到""这意味着"你就在替读者做总结。相信读者的智商，把事实扔在那他们自己会感受到。',
+  dialogue:'一整章全是"XXX说"读着分不清谁在说话。人在前/中/后三种模式轮着用，对话就有了呼吸感。',
+  senses:'连续三页全是视觉听觉读者大脑会麻木。扔一个气味或者温度进去——场景一下就活了。',
+  weakverb:'句句"他是""他有""他在"看几行就困了。换成一个具体的动作，句子自己会跑起来。',
+  pov:'限知视角下出现"他心想"等于告诉读者"我是作者在替配角思考"。读者自己会猜。',
+  fight:'发力部位、接触方式、目标部位、对方反应——四个环节缺一个读者都想象不出这一下是怎么打的。',
+  fightdir:'方向词太少读者不知道谁站在哪。每一轮交手前用一两个方向词把位置交代清楚。',
+  writeopen:'前300字还在写环境写天气——读者已经翻到下一章了。第一句话就让读者知道出事了。',
+  writepara:'一段超过300字视线会自己跳行。拆成两到三段，读到换行时读者有自然喘息。',
+};
+
+function rr(){const pool=document.getElementById('rulePool')||(function(){const p=document.createElement('div');p.id='rulePool';p.className='rule-pool';document.querySelector('.toolbar').before(p);return p})();pool.innerHTML='';rules.forEach(r=>{const can=r.l==='free'||(r.l==='deep'&&pu)||(r.l==='vip'&&vu);pool.innerHTML+=`<div class="rule-item"><div class="info"><div class="name">${lbs[r.l]}${r.n}${!can?' <span style="font-size:11px;color:#7c3aed">🔒</span>':''}</div><div class="desc">${r.d}</div></div><label class="switch"><input type="checkbox" id="chk_${r.id}" ${can&&r.enabled?'checked':''} ${can?'':'disabled'} onchange="tg('${r.id}',this.checked)"><span class="slider"></span></label></div>`})}
+
+function setTheme(t){document.body.setAttribute('data-theme',t);localStorage.setItem(atob('bHVvX3RoZW1l'),t);document.querySelectorAll('.theme-opt').forEach(el=>el.classList.toggle('active',el.dataset.theme===t))}
+(function(){const t=localStorage.getItem(atob('bHVvX3RoZW1l'));if(t){document.body.setAttribute('data-theme',t);document.querySelectorAll('.theme-opt').forEach(el=>el.classList.toggle('active',el.dataset.theme===t))}})();
+function tg(id,ch){const r=rules.find(x=>x.id===id);if(r)r.enabled=ch}
+function eh(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function showRw(id){if(!vu)return'<div style="margin-top:8px;font-size:11px;color:var(--warn)">💡 升级终极版可查看参考写法 → <a href="shop.html" style="color:var(--accent)">shop.html</a></div>';const m=getRw(id);if(!m)return'';let h='<div style="margin-top:10px;background:var(--rw);border:1px solid var(--card-border);border-radius:8px;padding:12px">';m.forEach((p,i)=>{h+=`<div style="font-size:12px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(100,100,100,.1)"><div style="color:var(--danger);margin-bottom:4px">❌ 原文：<span style="color:var(--text2)">${eh(p[0])}</span></div><div style="color:var(--success)">➜ 参考${i+1}：<span style="color:var(--text)">${p[1]}</span></div></div>`});h+='</div>';return h}
+
+function demo(){
+  document.getElementById('input').value='## 第一章 · 示例\n\n沈森趴在一截断墙后面，呼吸压得极慢。他的手指在颤抖。他猛地听到身后传来一阵脚步声——不是一个人，是三个人的。他脑子里闪过一个念头：完了。\n\n他心里盘算着下一步该怎么办，像被什么东西拽住了一样。\n\n就在这时，一个人影冲了出来！！\n\n沈森意识到自己已经没有退路了。他握着那根铁管，心想这一下必须打中要害才行。那个动作不是攻击，是试探。\n\n裂缝边缘的土层从灰色过渡到红褐色再到深赭色再到接近黑色。这是一道很宽的裂缝。裂缝很大。裂缝在不断扩张。';
+  setTimeout(run,100);
+}
+
+// ===== 文戏检测 =====
+function cw(text,lines){
+  let h='';
+  const pars=text.split(/\n\s*\n/).filter(p=>p.trim().length>0);let lp=0;
+  pars.forEach(p=>{const han=(p.match(/[一-鿿]/g)||[]).length;if(han>300)lp++});
+  h+=`<div class="fight-card"><h4>📏 段落长度</h4><div class="counter">共${pars.length}段，超长段（>300字）${lp}段${lp>0?' <span class="warn">⚠ 可考虑拆分</span>':' <span class="pass">✓ 正常</span>'}</div>${lp?`<div class="tip-box">💡 ${tips.writepara}</div>`:''}</div>`;
+  const f300=text.substring(0,300);const hc=/打|杀|追|逃|死|血|枪|刀|跑|冲|撞|摔|砸|吼|叫|危险|完了|不好/.test(f300);
+  h+=`<div class="fight-card"><h4>🎬 开篇冲突检测</h4><div class="counter">前300字${hc?'<span class="pass">✓ 有冲突信号</span>':'<span class="warn">⚠ 未检测到明显冲突</span>'}</div>${!hc?`<div class="tip-box">💡 ${tips.writeopen}</div>`:''}</div>`;
+  let ec=0;lines.forEach(l=>{if(/(这说明|他意识到|她明白了|那个动作不是|那个眼神|这意味着)/.test(l))ec++});
+  h+=`<div class="fight-card"><h4>🤫 留白检测</h4><div class="counter">多余解释句式 ${ec}处${ec>3?' <span class="warn">⚠ 可考虑删到3处以内</span>':' <span class="pass">✓ 合理</span>'}</div></div>`;
+  let dc=0;text.split('\n').forEach(l=>{if(/[""「]/.test(l.trim()))dc+=l.trim().length});
+  const tc=text.length,dr=tc>0?Math.round(dc/tc*100):0;
+  h+=`<div class="fight-card"><h4>💬 对话占比</h4><div class="counter">对话字符占比 ${dr}%${dr<10?' <span class="warn">⚠ 偏少</span>':' <span class="pass">✓ 正常</span>'}</div></div>`;
+  const ft=text,ss=[{n:'视觉',r:/看到|看见|视线|目光|视野|暗|亮|光|颜色|黑|白|红|灰|蓝|景/.test(ft)},{n:'听觉',r:/听到|听见|脚步声|轰鸣|响|安静/.test(ft)},{n:'嗅觉',r:/闻到|气味|香|臭|腥|柴油|机油|铁腥/.test(ft)},{n:'触觉',r:/凉|冷|温|热|刺痛|麻|疼|烫/.test(ft)},{n:'味觉',r:/苦|甜|咸|辣|酸|涩|舌尖/.test(ft)}];
+  const miss=ss.filter(s=>!s.r).map(s=>s.n);
+  h+=`<div class="fight-card"><h4>👃 感官覆盖</h4><div class="counter">${ss.map(s=>s.n+(s.r?'✅':'⚠')).join(' · ')}</div>${miss.length>0?'<div class="warn">⚠ 缺少'+miss.join('、')+'通道</div>':'<div class="pass">✓ 覆盖完整</div>'}</div>`;
+  return h;
+}
+
+// ===== 主检查 =====
+function run(){
+  const text=document.getElementById('input').value;
+  if(!text.trim())return alert('请粘贴正文');
+  if(text.length>4000)return alert('单次检查上限4000字，当前 '+text.length+' 字。请分段检查');
+  const lines=text.split('\n');document.getElementById('results').style.display='block';let html='';
+  const en=rules.filter(r=>r.enabled).map(r=>r.id);
+
+  if(en.includes('dash')){let is=[];lines.forEach((l,i)=>{let x=0;while((x=l.indexOf('——',x))!==-1){const s=Math.max(0,x-6),e=Math.min(l.length,x+10);is.push({l:i+1,c:(s>0?'…':'')+l.substring(s,e)+(e<l.length?'…':'')});x+=2}});html+=`<div class="section"><h3>📏破折号（提醒） ${is.length===0?'<span class="pass">✓</span>':'<span class="warn">⚠'+is.length+'处</span>'}</h3>${is.map(d=>`<div class="item"><span class="line-num">L${d.l}</span><span class="ctx">${eh(d.c)}</span></div>`).join('')}${is.length?showRw('dash'):''}</div>`}
+
+
+  if(en.includes('excl')){let is=[];const re=/!!|\?\?|！{2,}|？{2,}/g;lines.forEach((l,i)=>{let m;while((m=re.exec(l))!==null){const s=Math.max(0,m.index-4),e=Math.min(l.length,m.index+m[0].length+4);is.push({l:i+1,c:(s>0?'…':'')+l.substring(s,e)+(e<l.length?'…':'')})}});html+=`<div class="section"><h3>📏感叹号（提醒） ${is.length===0?'<span class="pass">✓</span>':'<span class="warn">⚠'+is.length+'处</span>'}</h3>${is.map(d=>`<div class="item"><span class="line-num">L${d.l}</span><span class="ctx">${eh(d.c)}</span></div>`).join('')}${is.length?showRw('excl'):''}</div>`}
+
+  if(en.includes('quote')){const lq=(text.match(/["「『]/g)||[]).length,rq=(text.match(/["」』]/g)||[]).length;const d=Math.abs(lq-rq);html+=`<div class="section"><h3>📏引号（提醒）</h3><div class="counter">左引号 ${lq} 个 · 右引号 ${rq} 个${d>0?' <span class="warn">⚠ 差 ${d} 个，可留意</span>':' <span class="pass">✓ 配对</span>'}</div>${d>0?showRw('quote'):''}</div>`}
+
+  if(en.includes('wc')){const han=(text.match(/[一-鿿]/g)||[]).length;html+=`<div class="section"><h3>📏汉字字数</h3><div class="counter">${han}字</div></div>`}
+
+  if(en.includes('repeatchar')){let is=[];const rc=text.match(/[一-鿿]/g)||[];for(let i=0;i<rc.length-50;i++){const sl=rc.slice(i,i+50),f={};sl.forEach(c=>{f[c]=(f[c]||0)+1});Object.keys(f).forEach(c=>{if(f[c]>=3&&!is.some(x=>x.c===c&&Math.abs(x.i-i)<30))is.push({c,count:f[c],i})})};html+=`<div class="section"><h3>📏用字重复（提醒）</h3><div class="counter">共${is.length}种字符高频重复${is.length>0?' <span class="warn">⚠ 可考虑换词或精简</span>':' <span class="pass">✓ 通过</span>'}</div>${is.slice(0,6).map(d=>`<div class="item"><span style="color:#fbbf24">【${d.c}×${d.count}】</span><span class="ctx">附近50字内出现${d.count}次</span></div>`).join('')}${is.length>6?`<div class="item" style="color:#555">…还有${is.length-6}个</div>`:''}</div>`}
+
+  if(en.includes('de')){let c=0;text.split(/[。！？\n]/).forEach(s=>{const m=s.match(/的/g);if(m&&m.length>=4)c++});html+=`<div class="section"><h3>📏"的"字（提醒）</h3><div class="counter">单句≥4个"的"的句子 ${c}句${c>0?' <span class="warn">⚠ 可考虑精简"的"字</span>':' <span class="pass">✓ 通过</span>'}</div>${c?showRw('de'):''}</div>`}
+
+  if(en.includes('dedede')){let is=[];const re=/(的)[的地得]/g;let m;while((m=re.exec(text))!==null){const s=Math.max(0,m.index-6),e=Math.min(text.length,m.index+8);is.push({c:text.substring(s,e).trim()})};html+=`<div class="section"><h3>📏"的地得"（提醒）</h3><div class="counter">疑似混用 ${is.length} 处${is.length>0?' <span class="warn">⚠ 可留意"的""地""得"使用</span>':' <span class="pass">✓ 通过</span>'}</div>${is.slice(0,6).map(d=>`<div class="item"><span class="ctx">${eh(d.c)}</span></div>`).join('')}${is.length>6?`<div class="item" style="color:#555">…还有${is.length-6}处</div>`:''}${is.length?showRw('dedede'):''}</div>`}
+
+  
+  if(en.includes('aiwords')){let is=[];const aw=['值得注意的是','不可否认的是','从某种角度来看','换言之','显而易见','众所周知','毋庸置疑','总的来说','与此同时','需要指出的是','不可忽略的是'];lines.forEach((l,i)=>{aw.forEach(w=>{let x=0;while((x=l.indexOf(w,x))!==-1){is.push({l:i+1,w,c:l.substring(Math.max(0,x-4),Math.min(l.length,x+w.length+4)).trim()});x+=w.length}})});html+=`<div class="section"><h3>📏AI过渡词（提醒）</h3><div class="counter">共${is.length}处${is.length>0?' <span class="warn">⚠ 这些词AI味太重，建议删或换</span>':' <span class="pass">✓ 通过</span>'}</div>${is.slice(0,6).map(d=>`<div class="item"><span class="line-num">L${d.l}</span><span style="color:#fbbf24">【${d.w}】</span><span class="ctx">${eh(d.c)}</span></div>`).join('')}${is.length>6?`<div class="item" style="color:#555">…还有${is.length-6}处</div>`:''}</div>`}
+if(en.includes('ranhou')){let is=[];const ws=['然后','接着','于是'];lines.forEach((l,i)=>{ws.forEach(w=>{let x=0;while((x=l.indexOf(w,x))!==-1){is.push({l:i+1,w,c:l.substring(Math.max(0,x-4),Math.min(l.length,x+w.length+4)).trim()});x+=w.length}})});html+=`<div class="section"><h3>📏过渡词（提醒）</h3><div class="counter">共${is.length}处${is.length>0?' <span class="warn">⚠ 直接用动作推进，别用"然后"串</span>':' <span class="pass">✓ 通过</span>'}</div>${is.slice(0,6).map(d=>`<div class="item"><span class="line-num">L${d.l}</span><span style="color:#fbbf24">【${d.w}】</span><span class="ctx">${eh(d.c)}</span></div>`).join('')}${is.length>6?`<div class="item" style="color:#555">…还有${is.length-6}处</div>`:''}${is.length?showRw('ranhou'):''}</div>`}
+
+  if(en.includes('haoxiang')){let is=[];const ws=['似乎','好像','仿佛'];lines.forEach((l,i)=>{ws.forEach(w=>{let x=0;while((x=l.indexOf(w,x))!==-1){is.push({l:i+1,w,c:l.substring(Math.max(0,x-4),Math.min(l.length,x+w.length+4)).trim()});x+=w.length}})});html+=`<div class="section"><h3>📏弱确定词（提醒）</h3><div class="counter">共${is.length}处${is.length>0?' <span class="warn">⚠ 删掉这些词，语气会更有力</span>':' <span class="pass">✓ 通过</span>'}</div>${is.slice(0,6).map(d=>`<div class="item"><span class="line-num">L${d.l}</span><span style="color:#fbbf24">【${d.w}】</span><span class="ctx">${eh(d.c)}</span></div>`).join('')}${is.length>6?`<div class="item" style="color:#555">…还有${is.length-6}处</div>`:''}${is.length?showRw('haoxiang'):''}</div>`}
+
+  if(en.includes('manman')){let is=[];const ws=['慢慢','缓缓','渐渐'];lines.forEach((l,i)=>{ws.forEach(w=>{let x=0;while((x=l.indexOf(w,x))!==-1){is.push({l:i+1,w,c:l.substring(Math.max(0,x-4),Math.min(l.length,x+w.length+4)).trim()});x+=w.length}})});html+=`<div class="section"><h3>📏慢速词（提醒）</h3><div class="counter">共${is.length}处${is.length>0?' <span class="warn">⚠ 紧张场景里用这些词会断节奏</span>':' <span class="pass">✓ 通过</span>'}</div>${is.slice(0,6).map(d=>`<div class="item"><span class="line-num">L${d.l}</span><span style="color:#fbbf24">【${d.w}】</span><span class="ctx">${eh(d.c)}</span></div>`).join('')}${is.length>6?`<div class="item" style="color:#555">…还有${is.length-6}处</div>`:''}${is.length?showRw('manman'):''}</div>`}
+  if(en.includes('custom')){
+    const raw=document.getElementById('cst')?document.getElementById('cst').value.trim():'';
+    if(raw){const ws=raw.split(/[,，、\s]+/).filter(w=>w);if(ws.length>0){let is=[];lines.forEach((l,i)=>{ws.forEach(w=>{let x=0;while((x=l.indexOf(w,x))!==-1){const s=Math.max(0,x-4),e=Math.min(l.length,x+w.length+4);is.push({l:i+1,w,c:(s>0?'…':'')+l.substring(s,e)+(e<l.length?'…':'')});x+=w.length}})});html+=`<div class="section"><h3>📏自定义禁词 ${is.length===0?'<span class="pass">✓未出现</span>':'<span class="warn">⚠'+is.length+'处</span>'}</h3>${is.slice(0,8).map(d=>`<div class="item"><span class="line-num">L${d.l}</span><span style="color:#fbbf24">【${d.w}】</span><span class="ctx">${eh(d.c)}</span></div>`).join('')}${is.length>8?`<div class="item" style="color:#555">…还有${is.length-8}处</div>`:''}</div>`}}
+  }
+
+  // 高级规则
+  if(en.includes('tail')){let c=0,ps=[];lines.forEach((l,i)=>{const t=l.trim();if(t.length<3)return;const s=t.substring(0,3);if(i>0&&ps.length&&ps[ps.length-1]===s)c++;ps.push(s);if(ps.length>5)ps.shift()});html+=`<div class="section"><h3>⚡追尾（提醒）</h3><div class="counter">${c}处${c>0?' <span class="warn">⚠可留意</span>':' <span class="pass">✓通过</span>'}</div>${c?showRw('tail'):''}</div>`}
+
+  if(en.includes('summary')){const ps=['他意识到','她意识到','他明白了','这意味着','这说明','那个动作的意思是','沈森听懂了'];let is=[];lines.forEach((l,i)=>{ps.forEach(p=>{let x=0;while((x=l.indexOf(p,x))!==-1){const s=Math.max(0,x-4),e=Math.min(l.length,x+p.length+4);is.push({l:i+1,p,c:(s>0?'…':'')+l.substring(s,e)+(e<l.length?'…':'')});x+=p.length}})});html+=`<div class="section"><h3>⚡替读者总结（提醒）</h3><div class="counter">${is.length}处${is.length>3?' <span class="warn">⚠可考虑删减</span>':' <span class="pass">✓合理</span>'}</div>${is.slice(0,6).map(d=>`<div class="item"><span class="line-num">L${d.l}</span><span style="color:#7c3aed">【${d.p}】</span><span class="ctx">${eh(d.c)}</span></div>`).join('')}${is.length>6?`<div class="item" style="color:#555">…${is.length-6}处</div>`:''}${is.length?showRw('summary'):''}</div>`}
+
+  if(en.includes('dialogue')){let f=0,m=0,bk=0;lines.forEach(l=>{const t=l.trim();/^[""「][^""」]+[""」].*说[了着过]?[。？！，]/.test(t)&&f++;/[。？！][""」]?\s*[，]?\s*[他她]说/.test(t)&&bk++;/说[，]/.test(t)&&m++});const t=f+m+bk,fr=t>0?Math.round(f/t*100):0;let dh=`<div class="counter">${t}句 · 前${f} · 中${m} · 后${bk}</div>`;let nt=false;if(t>0){if(bk===0&&m===0){dh+=`<div class="warn">⚠只有"人在前"</div>`;nt=true}else if(fr>70){dh+=`<div class="warn">⚠"人在前"${fr}%偏高</div>`;nt=true}else dh+=`<div class="pass">✅多样</div>`}else dh+=`<div class="pass">✅无明显对话</div>`;html+=`<div class="section"><h3>⚡对话提示（提醒）</h3>${dh}${nt?showRw('dialogue'):''}</div>`}
+
+  if(en.includes('senses')){const ft=text,h={视觉:/看到|看见|视线|目光|视野|暗|亮|光|颜色|黑|白|红|灰/.test(ft),听觉:/听到|听见|脚步声|轰鸣|响|安静/.test(ft),嗅觉:/闻到|气味|香|臭|腥|柴油|机油|铁腥/.test(ft),触觉:/凉|冷|温|热|刺痛|麻|疼|烫/.test(ft),味觉:/苦|甜|咸|辣|酸|涩|舌尖/.test(ft)};const fight=/打|杀|拳|踢|冲|撞|砸|刀|枪|闪|躲|格挡|追击/.test(ft);const all=[h.视觉,h.听觉,h.触觉,h.嗅觉,h.味觉];const present=all.filter(Boolean).length;const names=['视觉','听觉','触觉','嗅觉','味觉'];const miss=names.filter((n,i)=>!all[i]);let dh='视觉'+(h.视觉?'✅':'⚠')+' · 听觉'+(h.听觉?'✅':'⚠')+' · 触觉'+(h.触觉?'✅':'⚠')+' · 嗅觉'+(h.嗅觉?'○':'—')+' · 味觉'+(h.味觉?'○':'—');let st='';if(fight){if(present<3)st='<div class="warn">⚠ 打戏仅'+present+'感，至少触觉+听觉+视觉才够</div>'}else{if(present<3)st='<div class="warn">⚠ 仅'+present+'感，可考虑补到3个以上感官通道</div>';else if(present===3)st='<div class="pass">✅ 3感，够用了</div>';else st='<div class="pass">✓ 覆盖'+present+'感</div>'}html+=`<div class="section"><h3>⚡五感（提醒）</h3><div class="counter">${dh}</div>${st}${(fight&&present<3)||(!fight&&present<3)?showRw('senses'):''}</div>`}
+
+  if(en.includes('weakverb')){let c=0;text.split(/[。！？\n]/).forEach(s=>{if(/^[是在有存在]/.test(s.trim()))c++});html+=`<div class="section"><h3>⚡弱动词（提醒）</h3><div class="counter">句首"是/在/有" ${c}处${c>3?' <span class="warn">⚠偏多</span>':' <span class="pass">✓合理</span>'}</div>${c>3?showRw('weakverb'):''}</div>`}
+
+  if(en.includes('pov')){let is=[];lines.forEach((l,i)=>{if(/[""「]/.test(l))return;if(/[他她]心想|[他她]心里想/.test(l))is.push({l:i+1,c:l.substring(0,30)})});html+=`<div class="section"><h3>⚡视角（提醒）</h3><div class="counter">${is.length}处${is.length?' <span class="warn">⚠检查</span>':' <span class="pass">✓通过</span>'}</div>${is.slice(0,3).map(d=>`<div class="item"><span class="line-num">L${d.l}</span><span class="ctx">${eh(d.c)}</span></div>`).join('')}${is.length?showRw('pov'):''}</div>`}
+
+  // 终极版规则
+  if(en.includes('fight')){
+    const avs=['打','踢','抓','扯','拉','推','撞','压','砸','切','刺','劈','砍','捅','戳','抽','挥','甩','抡','格','挡','闪','躲','跳','翻','滚','扑','跨','蹲','蹿','蹬','旋','冲','跌','摔','撑','拽','抠','掰','锁','勒','掐','撕','顶'];let fh='';
+    const sts=text.split(/[。！？\n]/).filter(s=>s.trim().length>3);let wk=0,sd=[];
+    sts.forEach(s=>{const v=avs.filter(a=>s.includes(a)).length;sd.push({t:s,v});if(v<2)wk++});const as=sts.length>0?Math.round((1-wk/sts.length)*100):0;
+    fh+=`<div class="fight-card"><h4>🥊 动作密度</h4><div class="counter">打戏句${sts.length} · 富句${as}%${as<40?' <span class="warn">⚠偏低</span>':' <span class="pass">✓合理</span>'}</div></div>`;
+    const ht=/肩|肘|腕|膝|腰|胯|踝|掌|拳|指|脚|腿/.test(text),hc=/击中|撞|碰|擦|贴|挨/.test(text),ht2=/肋|腹|胸|背|颈|喉|面|额|眉|腿|膝|踝/.test(text),hr=/后退|踉跄|倒下|弯腰|缩|仰|扑倒|闷哼|吼/.test(text);
+    fh+=`<div class="fight-card"><h4>🔗 传导链</h4><div class="fight-grid"><div class="fight-cell"><div class="label">💪发力</div><div class="val">${ht?'✅':'⚠'}</div></div><div class="fight-cell"><div class="label">🤜接触</div><div class="val">${hc?'✅':'⚠'}</div></div><div class="fight-cell"><div class="label">🎯目标</div><div class="val">${ht2?'✅':'⚠'}</div></div><div class="fight-cell"><div class="label">💥反应</div><div class="val">${hr?'✅':'⚠'}</div></div></div>${(!ht||!hc||!ht2||!hr)?showRw('fight'):''}</div>`;
+    const dm={'左':0,'右':0,'前':0,'后':0,'上':0,'下':0};let td=0;lines.forEach(l=>{Object.keys(dm).forEach(d=>{let x=0;while((x=l.indexOf(d,x))!==-1){dm[d]++;td++;x++}})});
+    fh+=`<div class="fight-card"><h4>🧭 方向词</h4><div class="counter">共${td}处${td<5?' <span class="warn">⚠太少</span>':' <span class="pass">✓正常</span>'}</div><div class="fight-dir-bar">${Object.keys(dm).map(d=>{const h=Math.max(4,(dm[d]/Math.max(...Object.values(dm),1))*26);return `<div class="bar" style="height:${h}px;background:${dm[d]===0?'#444':'#7c3aed'}"><span class="bar-label">${d}<br>${dm[d]}</span></div>`}).join('')}</div></div>`;
+    html+=`<div class="section" style="border:1px solid var(--pvipc)"><h3><span style="font-size:18px">🥊</span> 打戏专项 <span style="font-size:11px;color:var(--pvipc);background:var(--pvip);padding:2px 8px;border-radius:4px">VIP</span></h3>${fh}</div>`;
+  }
+
+  if(en.includes('write')){html+=`<div class="section" style="border:1px solid var(--pdeepc)"><h3><span style="font-size:18px">📝</span> 文戏专项 <span style="font-size:11px;color:var(--pdeepc);background:var(--pdeep);padding:2px 8px;border-radius:4px">VIP</span></h3>${cw(text,lines)}</div>`}
+
+  // 统计
+  document.getElementById('results').innerHTML=html;
+  let te=0;document.querySelectorAll('#results .fail, #results .warn').forEach(el=>{const m=el.textContent.match(/(\d+)处/);if(m)te+=parseInt(m[1])});
+  html=`<div class="section" style="border-left:4px solid ${te===0?'#4ade80':'#e94560'}"><h3>📊 检查完成</h3><div class="counter">勾选了${en.length}条规则 · 共发现<strong>${te}</strong>处问题</div></div>`;
+  document.getElementById('results').innerHTML+=html;
+  // 终极版解锁后显示评分按钮
+  if(vu)document.getElementById('scoreBtn').style.display='inline-block';
+}
+
+// ===== 自定义禁词输入 =====
+(function(){const tb=document.querySelector('.toolbar');const d=document.createElement('div');d.style.cssText='width:100%;background:var(--card-bg);border:1px solid var(--card-border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 3px var(--shadow)';d.innerHTML='<span style="font-size:13px;color:var(--text2)">✏️ 自定义禁词</span><input type="text" id="cst" value="脑子里, 心里想, 心里盘, 心里有数" placeholder="用逗号隔开" style="flex:1;min-width:120px;background:var(--code);border:1px solid var(--card-border);border-radius:6px;padding:6px 10px;color:var(--text);font-size:13px">';tb.parentNode.insertBefore(d,tb.nextSibling)})();
+
+(function(){const b=rb();for(const c in b){if(b[c].t==='p'&&b[c].d&&b[c].d.includes(DID)){pu=true;bc.pro=c}if(b[c].t==='v'&&b[c].d&&b[c].d.includes(DID)){vu=true;bc.vvip=c}}})();
+if(pu)ep();if(vu){ep();ev()}rr();(function(){const t=localStorage.getItem(atob('bHVvX3RoZW1l'));if(t)document.body.setAttribute('data-theme',t)})();
+
+// ========================================================================
+// 📊 写作评分引擎（终极版专属）
+// ========================================================================
+
+const DIMS = [
+  {id:'opening',     n:'开篇冲击力', w:0.15, desc:'故事开场是否第一时间抓住读者'},
+  {id:'clean',       n:'语言纯净度', w:0.15, desc:'破折号/AI词/感叹号/弱确定词等污染控制'},
+  {id:'pace',        n:'节奏控制力', w:0.10, desc:'段落节奏、过渡词控制、慢速词使用'},
+  {id:'senses',      n:'五感沉浸度', w:0.15, desc:'视觉/听觉/触觉/嗅觉/味觉覆盖广度'},
+  {id:'action',      n:'动作质量',   w:0.15, desc:'打戏传导链完整度、动作动词密度、方向词'},
+  {id:'density',     n:'信息密度',   w:0.12, desc:'不替读者总结、不追尾、不啰嗦'},
+  {id:'vocab',       n:'词汇健康度', w:0.08, desc:'用字重复率、的地得正确、的密度控制'},
+  {id:'visual',      n:'画面感',     w:0.10, desc:'方向词丰富度、具象动词占比、场景可视性'},
+];
+
+// 各维度阈值: {new: [优秀分, 良好分, 及格分, 阈值参数...], old: [...]}
+// 返回0-10分
+function scoreOpening(text, mode) {
+  const isOld = mode === 'old';
+  const f100 = text.substring(0,100), f300 = text.substring(0,300);
+  const conflictRE = /打|杀|追|逃|死|血|枪|刀|跑|冲|撞|摔|砸|吼|叫|危险|完了|不好|跑|跳|跌|抓|扑|拉|扯|推|踢|掐|捏|撕|举|握|拔|掏|闪|躲|翻|滚/i;
+  const eventRE = /忽然|突然|就在这时|猛地|瞬间|轰|崩|碎|裂|爆|断/;
+  const c300 = (f300.match(conflictRE)||[]).length;
+  const c100 = (f100.match(conflictRE)||[]).length;
+  const hasEvent = eventRE.test(f100);
+  const hasAction = f100.length > 20 && /\S{2,}/.test(f100);
+  if(isOld){
+    if(c100 >= 3 && hasEvent) return 10;
+    if(c100 >= 2) return 8;
+    if(c300 >= 3) return 6;
+    if(c300 >= 1) return 4;
+    return hasAction ? 3 : 1;
+  }
+  // new reader
+  if(c300 >= 3) return 10;
+  if(c300 >= 1) return 8;
+  if(c300 >= 0 && hasAction) return 5;
+  return 3;
+}
+
+function scoreClean(text, lines, mode) {
+  const isOld = mode === 'old';
+  let deduct = 0;
+  // 破折号
+  const dashes = (text.match(/——/g)||[]).length;
+  if(isOld){ if(dashes>0) deduct+=99; }
+  else deduct += dashes * 2;
+  // 感叹号堆叠
+  const exc = (text.match(/!!|\?\?|！{2,}|？{2,}/g)||[]).length;
+  deduct += exc * (isOld ? 3 : 1.5);
+  // AI词
+  const aiWords = ['值得注意的是','不可否认的是','显而易见','众所周知','毋庸置疑','总的来说','与此同时','需要指出的是'];
+  let aiCount=0; aiWords.forEach(w=>{let x=0;while((x=text.indexOf(w,x))!==-1){aiCount++;x+=w.length}});
+  deduct += aiCount * (isOld ? 3 : 1.5);
+  // 弱确定词
+  const weak = /似乎|好像|仿佛/g;
+  const wk = (text.match(weak)||[]).length;
+  deduct += wk * (isOld ? 2 : 1);
+  // AI过渡词(额外)
+  const aiExtra = /从某种角度来看|换言之|不可忽略的是/;
+  const ae = (text.match(aiExtra)||[]).length;
+  deduct += ae * (isOld ? 3 : 1.5);
+  // 慢速副词(仅供参考，少扣)
+  const slow = /慢慢|缓缓|渐渐/g;
+  const sl = (text.match(slow)||[]).length;
+  deduct += sl * (isOld ? 1.5 : 0.5);
+
+  let score = Math.max(0, 10 - deduct);
+  if(isOld && dashes>0) score = 0;
+  return Math.round(score * 10) / 10;
+}
+
+function scorePace(text, mode) {
+  const isOld = mode === 'old';
+  const pars = text.split(/\n\s*\n/).filter(p=>p.trim().length>0);
+  let longPar=0; pars.forEach(p=>{const h=(p.match(/[一-鿿]/g)||[]).length; if(h>300)longPar++});
+  const longRatio = pars.length>0 ? longPar/pars.length : 0;
+  // 过渡词
+  const trans = /然后|接着|于是/g;
+  const tc = (text.match(trans)||[]).length;
+  // 追尾
+  const lines2 = text.split('\n');
+  let tailC=0,ps=[];
+  lines2.forEach((l,i)=>{const t=l.trim();if(t.length<3)return;const s=t.substring(0,3);
+    if(i>0&&ps.length&&ps[ps.length-1]===s)tailC++;ps.push(s);if(ps.length>5)ps.shift()});
+
+  if(isOld){
+    if(longRatio===0 && tc===0 && tailC===0) return 10;
+    let d = 0;
+    if(longRatio>0.1) d += 3;
+    if(tc>0) d += Math.min(tc*1.5,4);
+    if(tailC>0) d += Math.min(tailC*2,4);
+    return Math.max(1, 10-d);
+  }
+  // new
+  if(longRatio<0.15 && tc<=2 && tailC<=1) return 10;
+  if(longRatio<0.3 && tc<=4 && tailC<=3) return 8;
+  if(longRatio<0.5 && tc<=8 && tailC<=5) return 6;
+  if(longRatio<0.7 && tc<=12) return 4;
+  return 2;
+}
+
+function scoreSenses(text, mode) {
+  const isOld = mode === 'old';
+  const h = {
+    visual: /看到|看见|视线|目光|视野|暗|亮|光|颜色|黑|白|红|灰|蓝|景|影|形|轮廓/.test(text),
+    audio: /听到|听见|脚步|轰鸣|响|安静|声|音|吼|啸|呼/.test(text),
+    smell: /闻到|气味|香|臭|腥|柴油|机油|铁腥|硝烟|灰|霉|锈/.test(text),
+    touch: /凉|冷|温|热|刺痛|麻|疼|烫|寒|冰|暖/.test(text),
+    taste: /苦|甜|咸|辣|酸|涩|舌尖|滋味/.test(text),
+  };
+  const count = [h.visual, h.audio, h.smell, h.touch, h.taste].filter(Boolean).length;
+  if(isOld){
+    if(count>=4) return 10;
+    if(count>=3) return 7;
+    if(count>=2) return 4;
+    return 1;
+  }
+  if(count>=3) return 10;
+  if(count>=2) return 7;
+  if(count>=1) return 4;
+  return 1;
+}
+
+function scoreAction(text, lines, mode) {
+  const isOld = mode === 'old';
+  const avs=['打','踢','抓','扯','拉','推','撞','压','砸','切','刺','劈','砍','捅','戳','抽','挥','甩','抡','格','挡','闪','躲','跳','翻','滚','扑','跨','蹲','蹿','蹬','旋','冲','跌','摔','撑','拽','抠','掰','锁','勒','掐','撕','顶','爬','滑','端','举','握','收','探'];
+  const sts=text.split(/[。！？\n]/).filter(s=>s.trim().length>3);
+  let wk=0; sts.forEach(s=>{const v=avs.filter(a=>s.includes(a)).length;if(v<2)wk++});
+  const richRate = sts.length>0 ? Math.round((1-wk/sts.length)*100) : 0;
+  const chain = {
+    power: /肩|肘|腕|膝|腰|胯|踝|掌|拳|指|脚|腿/.test(text),
+    contact: /击中|撞|碰|擦|贴|挨|咬|砸/.test(text),
+    target: /肋|腹|胸|背|颈|喉|面|额|眉|腿|膝|踝/.test(text),
+    reaction: /后退|踉跄|倒下|弯腰|缩|仰|扑倒|闷哼|吼|叫/.test(text),
+  };
+  const chainCount = Object.values(chain).filter(Boolean).length;
+  const dm={'左':0,'右':0,'前':0,'后':0,'上':0,'下':0};let td=0;
+  lines.forEach(l=>{Object.keys(dm).forEach(d=>{let x=0;while((x=l.indexOf(d,x))!==-1){dm[d]++;td++;x++}})});
+
+  if(isOld){
+    if(chainCount>=4 && richRate>=35 && td>=20 && dm['左']>0 && dm['右']>0) return 10;
+    if(chainCount>=4 && richRate>=25 && td>=15) return 8;
+    if(chainCount>=3 && richRate>=15 && td>=10) return 6;
+    if(chainCount>=2 && richRate>=10) return 4;
+    return 1;
+  }
+  if(chainCount>=4 && richRate>=20 && td>=10) return 10;
+  if(chainCount>=3 && richRate>=15 && td>=8) return 8;
+  if(chainCount>=3 && richRate>=10) return 6;
+  if(chainCount>=2) return 4;
+  return 1;
+}
+
+function scoreDensity(text, lines, mode) {
+  const isOld = mode === 'old';
+  const summaryPs = ['他意识到','她意识到','他明白了','这意味着','这说明','那个动作的意思是','沈森听懂了','沈森意识到','她明白了','她意识到'];
+  let sCount=0; lines.forEach(l=>{summaryPs.forEach(w=>{let x=0;while((x=l.indexOf(w,x))!==-1){sCount++;x+=w.length}})});
+  // 追尾
+  let tailC=0,ps=[];
+  lines.forEach((l,i)=>{const t=l.trim();if(t.length<3)return;const s=t.substring(0,3);if(i>0&&ps.length&&ps[ps.length-1]===s)tailC++;ps.push(s);if(ps.length>5)ps.shift()});
+  // "然后"类
+  const thenC = (text.match(/然后|接着|于是/g)||[]).length;
+  // "就是"等废话填充
+  const filler = /说白了|换句话|简单来说|众所周知/g;
+  const fC = (text.match(filler)||[]).length;
+
+  if(isOld){
+    let d=0;
+    d += Math.min(sCount*2, 5);
+    d += Math.min(tailC*2, 4);
+    d += Math.min(thenC*1.5, 3);
+    d += fC*2;
+    return Math.max(0, 10-d);
+  }
+  let d=0;
+  d += Math.min(sCount*1.5, 4);
+  d += Math.min(tailC*1.5, 3);
+  d += Math.min(thenC*1, 2);
+  d += fC*1.5;
+  return Math.max(1, 10-d);
+}
+
+function scoreVocab(text, mode) {
+  const isOld = mode === 'old';
+  const han = text.match(/[一-鿿]/g) || [];
+  // 重复字
+  let rr=[];
+  for(let i=0;i<han.length-50;i++){const sl=han.slice(i,i+50),f={};sl.forEach(c=>{f[c]=(f[c]||0)+1});Object.keys(f).forEach(c=>{if(f[c]>=3&&!rr.some(x=>x.c===c&&Math.abs(x.i-i)<30))rr.push({c,count:f[c],i})})};
+  const rCount = rr.length;
+  // 的地得
+  const ddd = (text.match(/(的)[的地得]/g)||[]).length;
+  // 的密度: 含4个以上"的"的句子数
+  let deSen=0; text.split(/[。！？\n]/).forEach(s=>{if((s.match(/的/g)||[]).length>=4)deSen++});
+  // 句子平均长
+  const sens = text.split(/[。！？\n]/).filter(s=>s.trim().length>5);
+  const avgLen = sens.length>0 ? Math.round(han.length/sens.length) : 0;
+
+  if(isOld){
+    let d=0;
+    if(rCount>15) d += 3; else if(rCount>8) d += 1.5;
+    if(ddd>2) d += 2; else if(ddd>0) d += 1;
+    if(deSen>3) d += 2.5; else if(deSen>1) d += 1;
+    if(avgLen>35) d += 2; else if(avgLen>25) d += 1;
+    return Math.max(1, 10-d);
+  }
+  let d=0;
+  if(rCount>30) d += 3; else if(rCount>15) d += 1.5;
+  if(ddd>5) d += 2; else if(ddd>2) d += 1;
+  if(deSen>5) d += 2; else if(deSen>3) d += 1;
+  if(avgLen>40) d += 1.5; else if(avgLen>30) d += 0.5;
+  return Math.max(2, 10-d);
+}
+
+function scoreVisual(text, lines, mode) {
+  const isOld = mode === 'old';
+  const dm={'左':0,'右':0,'前':0,'后':0,'上':0,'下':0};let td=0;
+  lines.forEach(l=>{Object.keys(dm).forEach(d=>{let x=0;while((x=l.indexOf(d,x))!==-1){dm[d]++;td++;x++}})});
+  const dirCount = Object.values(dm).filter(v=>v>0).length;
+  // 具象动词（比avs更宽）
+  const concreteVerbs = /握|举|抬|放|抓|拉|推|踢|踩|跨|蹲|站|坐|跪|趴|躺|靠|扶|撑|抵|贴|伸|缩|转|扭|仰|低|侧|弓|绷|绷/g;
+  const cvCount = (text.match(concreteVerbs)||[]).length;
+  const totalSentences = text.split(/[。！？\n]/).filter(s=>s.trim().length>3).length;
+  const cvRate = totalSentences>0 ? Math.round(cvCount/totalSentences*100) : 0;
+  // 色彩/光线词
+  const lightWords = /黑|白|红|灰|蓝|暗|亮|光|影|色/g;
+  const lwCount = (text.match(lightWords)||[]).length;
+
+  if(isOld){
+    let d=0;
+    if(td<15) d+=3; else if(td<10) d+=5;
+    if(dirCount<4) d+=2;
+    if(cvRate<40) d+=2; else if(cvRate<25) d+=4;
+    if(lwCount<3) d+=2;
+    return Math.max(1, 10-d);
+  }
+  let d=0;
+  if(td<10) d+=3; else if(td<5) d+=5;
+  if(dirCount<3) d+=2;
+  if(cvRate<30) d+=2; else if(cvRate<20) d+=4;
+  if(lwCount<2) d+=2;
+  return Math.max(2, 10-d);
+}
+
+// 综合评分
+function computeScore(mode, text, lines){
+  const s = [
+    scoreOpening(text, mode),
+    scoreClean(text, lines, mode),
+    scorePace(text, mode),
+    scoreSenses(text, mode),
+    scoreAction(text, lines, mode),
+    scoreDensity(text, lines, mode),
+    scoreVocab(text, mode),
+    scoreVisual(text, lines, mode),
+  ];
+  const total = Math.round(DIMS.reduce((a, dim, i) => a + s[i] * dim.w * 10, 0));
+  return {scores: s, total};
+}
+
+function getGrade(score, mode){
+  if(mode==='old'){
+    if(score>=90) return {g:'S',l:'殿堂级',c:'grade-S'};
+    if(score>=78) return {g:'A',l:'优秀',c:'grade-A'};
+    if(score>=65) return {g:'B',l:'良好',c:'grade-B'};
+    if(score>=50) return {g:'C',l:'及格',c:'grade-C'};
+    return {g:'D',l:'需打磨',c:'grade-D'};
+  }
+  if(score>=90) return {g:'S',l:'殿堂级',c:'grade-S'};
+  if(score>=75) return {g:'A',l:'优秀',c:'grade-A'};
+  if(score>=60) return {g:'B',l:'良好',c:'grade-B'};
+  if(score>=45) return {g:'C',l:'及格',c:'grade-C'};
+  return {g:'D',l:'需打磨',c:'grade-D'};
+}
+
+let currentMode = 'new';
+let lastScore = null;
+
+function showScorePanel(){
+  const text = document.getElementById('input').value;
+  if(!text.trim()) return alert('请先粘贴正文');
+  if(!vu) return alert('🔒 评分功能仅限终极版用户使用');
+  const lines = text.split('\n');
+  const result = computeScore(currentMode, text, lines);
+  lastScore = result;
+  renderScore(currentMode, result);
+  document.getElementById('scoreSection').style.display='block';
+  document.getElementById('scoreSection').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function switchScore(mode){
+  currentMode = mode;
+  document.querySelectorAll('#scoreToggle button').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+  if(lastScore){
+    const text = document.getElementById('input').value;
+    const lines = text.split('\n');
+    const result = computeScore(mode, text, lines);
+    lastScore = result;
+    renderScore(mode, result);
+  }
+}
+
+function renderScore(mode, result){
+  const {scores, total} = result;
+  const grade = getGrade(total, mode);
+  // Big score
+  document.getElementById('scoreBig').textContent = total;
+  document.getElementById('scoreGradeLabel').textContent = grade.g+' — '+grade.l;
+  document.getElementById('scoreGradeLabel').className = 'score-grade '+grade.c;
+  document.getElementById('scoreTotalLabel').textContent = mode==='new' ? '新读者标准 · 总分' : '老读者标准 · 总分';
+
+  // Dimension bars
+  const colors = ['#8b5cf6','#3b82f6','#10b981','#f59e0b','#ef4444','#06b6d4','#84cc16','#ec4899'];
+  let html='';
+  const scoreDesc = {
+    'opening':['开场平缓，缺少冲突信号','有少量冲突元素','开篇有力，能抓住读者','前三行就引爆冲突'],
+    'clean':['多处语言污染','基础可读，有几处瑕疵','语言干净，无明显污染','极致纯净，零污染'],
+    'pace':['节奏拖沓，段落过长','节奏较平，可适当拆分','节奏控制良好','节奏精准，张弛有度'],
+    'senses':['只有1-2种感官','3种感官，基础覆盖','4种感官，较沉浸','五感全开，身临其境'],
+    'action':['动作稀疏，传导链不完整','动作描写基本可用','动作质量好，传导链完整','打戏行云流水'],
+    'density':['信息冗余明显','偶尔替读者总结','信息密度控制良好','字字有用，绝不废话'],
+    'vocab':['重复字多，用词单调','词汇基本健康','词汇丰富，用字精炼','字词功力扎实'],
+    'visual':['画面感弱，缺乏方向指引','画面感一般','场景清晰可想象','画面历历在目'],
+  };
+
+  DIMS.forEach((dim,i)=>{
+    const s = scores[i];
+    const pct = Math.round(s * 10);
+    const barPct = Math.max(5, pct);
+    const color = colors[i];
+    const descs = scoreDesc[dim.id];
+    const sd = s>=9 ? descs[3] : s>=7 ? descs[2] : s>=4 ? descs[1] : descs[0];
+    html += `<div class="score-dim">
+      <div class="label">${dim.n}</div>
+      <div class="bar-wrap">
+        <div class="bar-fill" data-pct="${pct}%" style="width:${barPct}%;background:${color}"></div>
+      </div>
+      <div class="val">${s.toFixed(1)}</div>
+    </div>`;
+  });
+  document.getElementById('scoreDims').innerHTML = html;
+
+  // Breakdown
+  renderBreakdown(mode, result);
+}
+
+function renderBreakdown(mode, result){
+  let txt = '';
+  const text = document.getElementById('input').value;
+  const lines = text.split('\n');
+
+  // Each dimension's raw data
+  const f100 = text.substring(0,100), f300 = text.substring(0,300);
+  const c100 = (f100.match(/打|杀|追|逃|死|血|枪|刀|跑|冲|撞|摔|砸|吼|叫|危险|完了|不好/i)||[]).length;
+  const c300 = (f300.match(/打|杀|追|逃|死|血|枪|刀|跑|冲|撞|摔|砸|吼|叫|危险|完了|不好/i)||[]).length;
+  txt += `<div class="score-bd-item"><span class="bd-label">📌 开篇冲击</span><span>前100字冲突词${c100}个 · 前300字${c300}个 · 得分${result.scores[0].toFixed(1)}/10</span></div>`;
+
+  const dashes = (text.match(/——/g)||[]).length;
+  const exc = (text.match(/!!|\?\?|！{2,}|？{2,}/g)||[]).length;
+  const wk = (text.match(/似乎|好像|仿佛/g)||[]).length;
+  txt += `<div class="score-bd-item"><span class="bd-label">📌 语言纯净</span><span>破折号${dashes}处 · 感叹号堆${exc}处 · 弱词${wk}处 · 得分${result.scores[1].toFixed(1)}/10</span></div>`;
+
+  const pars = text.split(/\n\s*\n/).filter(p=>p.trim().length>0);
+  let lp=0; pars.forEach(p=>{const h=(p.match(/[一-鿿]/g)||[]).length; if(h>300)lp++});
+  const trans = (text.match(/然后|接着|于是/g)||[]).length;
+  txt += `<div class="score-bd-item"><span class="bd-label">📌 节奏控制</span><span>超长段${lp}/${pars.length} · 过渡词${trans}处 · 得分${result.scores[2].toFixed(1)}/10</span></div>`;
+
+  const senses={
+    v:/看到|看见|视线|目光|视野|暗|亮|光|颜色|黑|白|红|灰|蓝|景|影|形|轮廓/.test(text),
+    a:/听到|听见|脚步|轰鸣|响|安静|声|音|吼|啸/.test(text),
+    s:/闻到|气味|香|臭|腥|柴油|机油|铁腥|硝烟|灰|霉/.test(text),
+    t:/凉|冷|温|热|刺痛|麻|疼|烫|寒|冰|暖/.test(text),
+    ta:/苦|甜|咸|辣|酸|涩|舌尖|滋味/.test(text),
+  };
+  const sc = [senses.v,senses.a,senses.s,senses.t,senses.ta].filter(Boolean).length;
+  const snames = ['视觉','听觉','嗅觉','触觉','味觉'];
+  const active = snames.filter((n,i)=>[senses.v,senses.a,senses.s,senses.t,senses.ta][i]).join('、');
+  txt += `<div class="score-bd-item"><span class="bd-label">📌 五感沉浸</span><span>覆盖${sc}/5感（${active}） · 得分${result.scores[3].toFixed(1)}/10</span></div>`;
+
+  const avs = ['打','踢','抓','扯','拉','推','撞','压','砸','切','刺','劈','砍','捅','戳','抽','挥','甩','抡','格','挡','闪','躲','跳','翻','滚','扑','跨','蹲','蹿','蹬','旋','冲','跌','摔','撑','拽','抠','掰','锁','勒','掐','撕','顶'];
+  const sts = text.split(/[。！？\n]/).filter(s=>s.trim().length>3);
+  let wk2=0; sts.forEach(s=>{const v=avs.filter(a=>s.includes(a)).length;if(v<2)wk2++});
+  const rich = sts.length>0 ? Math.round((1-wk2/sts.length)*100) : 0;
+  txt += `<div class="score-bd-item"><span class="bd-label">📌 动作质量</span><span>动作富集${rich}% · 方向词${(text.match(/左|右|前|后|上|下/g)||[]).length}个 · 得分${result.scores[4].toFixed(1)}/10</span></div>`;
+
+  const summaryPs = ['他意识到','她意识到','他明白了','这意味着','这说明','那个动作的意思是'];
+  let sc2=0; lines.forEach(l=>{summaryPs.forEach(w=>{let x=0;while((x=l.indexOf(w,x))!==-1){sc2++;x+=w.length}})});
+  let tailC2=0,ps2=[]; lines.forEach((l,i)=>{const t=l.trim();if(t.length<3)return;const s=t.substring(0,3);if(i>0&&ps2.length&&ps2[ps2.length-1]===s)tailC2++;ps2.push(s);if(ps2.length>5)ps2.shift()});
+  txt += `<div class="score-bd-item"><span class="bd-label">📌 信息密度</span><span>替读者总结${sc2}处 · 追尾${tailC2}处 · 得分${result.scores[5].toFixed(1)}/10</span></div>`;
+
+  const han = text.match(/[一-鿿]/g)||[];
+  let rr2=[];
+  for(let i=0;i<han.length-50;i++){const sl=han.slice(i,i+50),f={};sl.forEach(c=>{f[c]=(f[c]||0)+1});Object.keys(f).forEach(c=>{if(f[c]>=3&&!rr2.some(x=>x.c===c&&Math.abs(x.i-i)<30))rr2.push({c,count:f[c],i})})};
+  txt += `<div class="score-bd-item"><span class="bd-label">📌 词汇健康</span><span>重复字类型${rr2.length}种 · 的地得${(text.match(/(的)[的地得]/g)||[]).length}处 · 得分${result.scores[6].toFixed(1)}/10</span></div>`;
+
+  const dm={'左':0,'右':0,'前':0,'后':0,'上':0,'下':0};let td=0;
+  lines.forEach(l=>{Object.keys(dm).forEach(d=>{let x=0;while((x=l.indexOf(d,x))!==-1){dm[d]++;td++;x++}})});
+  const dirStr = Object.entries(dm).filter(([k,v])=>v>0).map(([k,v])=>k+':'+v).join(' ');
+  txt += `<div class="score-bd-item"><span class="bd-label">📌 画面感</span><span>方向词${td}个（${dirStr}） · 得分${result.scores[7].toFixed(1)}/10</span></div>`;
+
+  // 总分汇总
+  const grade = getGrade(result.total, mode);
+  txt += `<div class="score-bd-item" style="border-top:1px solid var(--card-border);padding-top:10px;margin-top:6px;font-weight:600"><span class="bd-label">总分</span><span>${result.total}分 · ${grade.g}级 · ${grade.l}</span></div>`;
+
+  document.getElementById('scoreBdContent').innerHTML = txt;
+}
+
+function toggleBreakdown(){
+  const el = document.getElementById('scoreBreakdown');
+  el.classList.toggle('show');
+}
+</script>
+</body>
+</html>
